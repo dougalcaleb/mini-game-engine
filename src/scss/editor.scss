@@ -1,0 +1,217 @@
+@use "common";
+
+.editor {
+	display: flex;
+	height: 100vh;
+
+	.elements {
+		min-width: 200px;
+		flex: 1;
+		box-sizing: border-box;
+		background: common.$ed_bg;
+		border: 2px solid common.$ed_border;
+		.world, .scripts {
+			.world-element-tiles {
+				// background: orange;
+				display: flex;
+				justify-content: center;
+				width: 90%;
+				flex-wrap: wrap;
+				margin: auto;
+				div {
+					height: 50px;
+					width: 50px;
+					background-color: #111;
+					margin: 10px;
+					position: relative;
+               cursor: pointer;
+               background-size: cover;
+               background-position: center center;
+               image-rendering: pixelated;
+               box-sizing: border-box;
+				}
+            .add-block {
+               svg {
+                  color: white;
+                  position: absolute;
+                  left: 0;
+                  right: 0;
+                  top: 0;
+                  bottom: 0;
+                  height: 35px;
+                  width: 35px;
+                  margin: auto;
+               }
+            }
+			}
+		}
+	}
+
+	.views {
+		min-width: 300px;
+		flex: 5;
+		box-sizing: border-box;
+		background: common.$ed_bg;
+		> div {
+			border: 2px solid common.$ed_border;
+			height: 50%;
+			box-sizing: border-box;
+         position: relative;
+         overflow: hidden;
+		}
+	}
+
+	.inspector {
+		min-width: 200px;
+		flex: 1;
+		box-sizing: border-box;
+		background: common.$ed_bg;
+		border: 2px solid common.$ed_border;
+	}
+
+	& > div {
+		height: 100%;
+		position: relative;
+	}
+}
+
+.expandable {
+	overflow: hidden;
+   position: relative;
+	background: common.$ed_gray_medium;
+   margin: 5px;
+   .title {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      color: white;
+      font-family: "Roboto", sans-serif;
+      margin: 0;
+   }
+	.expand-button {
+		position: absolute;
+		display: flex;
+      right: 5px;
+      top: 5px;
+      height: 25px;
+		width: 25px;
+		background: common.$ed_gray_dark;
+      border-radius: 5px;
+      overflow: hidden;
+      .clickable {
+         position: absolute;
+         height: 100%;
+         width: 100%;
+         top: 0;
+         left: 0;
+         right: 0;
+         bottom:0;
+         z-index: 2;
+         cursor: pointer;
+      }
+		svg {
+			color: white;
+			z-index: 1;
+			border-radius: 5px;
+			cursor: pointer;
+			position: absolute;
+		}
+	}
+}
+
+.edit-view {
+   .world-edit {
+      background-image: url("../images/box-2-sides.png");
+      background-color: common.$world-bg-default;
+      height: 1600px;
+      width: 3200px;
+      cursor: grab;
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 2;
+      // cursor:
+   }
+   .edit-view-header {
+      background: common.$ed_border;
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 20px;
+      width: 100%;
+      z-index: 5;
+      display: flex;
+      .icon {
+         width: 40px;
+      }
+      .other {
+         padding-left: 5px;
+         padding-right: 5px;
+         display: flex;
+         align-items: center;
+         input {
+            margin-right: 5px;
+         }
+         input[type="color"] {
+            height: 15px;
+            width: 15px;
+            border: none;
+            appearance: none;
+            &::-webkit-color-swatch-wrapper {
+               padding: 0;
+            }
+            &::-webkit-color-swatch {
+               border: none;
+            }
+         }
+      }
+      > div {
+         height: inherit;
+         position: relative;
+         // background: purple;
+         // width: 40px;
+         cursor: pointer;
+         font-family:'Courier New', Courier, monospace;
+         color: white;
+         span {
+            margin-top: -2px;
+            margin-left: -2px;
+         }
+         &:hover {
+            background: common.$ed_bg
+         }
+         > svg {
+            color: white;
+            position: absolute;
+            height: 20px;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+         }
+      }
+   }
+}
+
+.header-selected {
+   // border: 1px solid common.$theme-blue-dark;
+   // box-sizing: border-box;
+   background: common.$theme-blue-dark; 
+}
+
+.marker-square {
+   height: 16px;
+   width: 16px;
+   background: white;
+   opacity: 0.5;
+   position: absolute;
+   bottom: 0;
+   left: 0;
+}
+
+.world-tile {
+   height: 16px;
+   width: 16px;
+   position: absolute;
+}

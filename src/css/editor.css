@@ -1,0 +1,199 @@
+.editor {
+  display: flex;
+  height: 100vh;
+}
+.editor .elements {
+  min-width: 200px;
+  flex: 1;
+  box-sizing: border-box;
+  background: #4a4a4a;
+  border: 2px solid #333;
+}
+.editor .elements .world .world-element-tiles, .editor .elements .scripts .world-element-tiles {
+  display: flex;
+  justify-content: center;
+  width: 90%;
+  flex-wrap: wrap;
+  margin: auto;
+}
+.editor .elements .world .world-element-tiles div, .editor .elements .scripts .world-element-tiles div {
+  height: 50px;
+  width: 50px;
+  background-color: #111;
+  margin: 10px;
+  position: relative;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center center;
+  image-rendering: pixelated;
+  box-sizing: border-box;
+}
+.editor .elements .world .world-element-tiles .add-block svg, .editor .elements .scripts .world-element-tiles .add-block svg {
+  color: white;
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  height: 35px;
+  width: 35px;
+  margin: auto;
+}
+.editor .views {
+  min-width: 300px;
+  flex: 5;
+  box-sizing: border-box;
+  background: #4a4a4a;
+}
+.editor .views > div {
+  border: 2px solid #333;
+  height: 50%;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+}
+.editor .inspector {
+  min-width: 200px;
+  flex: 1;
+  box-sizing: border-box;
+  background: #4a4a4a;
+  border: 2px solid #333;
+}
+.editor > div {
+  height: 100%;
+  position: relative;
+}
+
+.expandable {
+  overflow: hidden;
+  position: relative;
+  background: #3e3e3e;
+  margin: 5px;
+}
+.expandable .title {
+  position: absolute;
+  left: 8px;
+  top: 8px;
+  color: white;
+  font-family: "Roboto", sans-serif;
+  margin: 0;
+}
+.expandable .expand-button {
+  position: absolute;
+  display: flex;
+  right: 5px;
+  top: 5px;
+  height: 25px;
+  width: 25px;
+  background: #222;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.expandable .expand-button .clickable {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  cursor: pointer;
+}
+.expandable .expand-button svg {
+  color: white;
+  z-index: 1;
+  border-radius: 5px;
+  cursor: pointer;
+  position: absolute;
+}
+
+.edit-view .world-edit {
+  background-image: url("../images/box-2-sides.png");
+  background-color: #09c4e8;
+  height: 1600px;
+  width: 3200px;
+  cursor: grab;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+.edit-view .edit-view-header {
+  background: #333;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 20px;
+  width: 100%;
+  z-index: 5;
+  display: flex;
+}
+.edit-view .edit-view-header .icon {
+  width: 40px;
+}
+.edit-view .edit-view-header .other {
+  padding-left: 5px;
+  padding-right: 5px;
+  display: flex;
+  align-items: center;
+}
+.edit-view .edit-view-header .other input {
+  margin-right: 5px;
+}
+.edit-view .edit-view-header .other input[type=color] {
+  height: 15px;
+  width: 15px;
+  border: none;
+  appearance: none;
+}
+.edit-view .edit-view-header .other input[type=color]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+.edit-view .edit-view-header .other input[type=color]::-webkit-color-swatch {
+  border: none;
+}
+.edit-view .edit-view-header > div {
+  height: inherit;
+  position: relative;
+  cursor: pointer;
+  font-family: "Courier New", Courier, monospace;
+  color: white;
+}
+.edit-view .edit-view-header > div span {
+  margin-top: -2px;
+  margin-left: -2px;
+}
+.edit-view .edit-view-header > div:hover {
+  background: #4a4a4a;
+}
+.edit-view .edit-view-header > div > svg {
+  color: white;
+  position: absolute;
+  height: 20px;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+}
+
+.header-selected {
+  background: #006b8c;
+}
+
+.marker-square {
+  height: 16px;
+  width: 16px;
+  background: white;
+  opacity: 0.5;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+.world-tile {
+  height: 16px;
+  width: 16px;
+  position: absolute;
+}

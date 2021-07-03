@@ -1,0 +1,16 @@
+- New Elements section: Camera
+   - Select a game object to follow
+   - Camera dictates how the world scrolls
+
+- New Elements section: Physics objects
+   - Player
+   - Block
+
+- New Elements section: Dynamic objects
+   - Scripted Block
+
+Physics:
+   - Gravity
+
+Game:
+   - Compile level object blocks

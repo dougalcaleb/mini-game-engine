@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Mini Game Engine</title>
+		<link rel="stylesheet" type="text/css" href="./css/style.css" />
+		<link rel="stylesheet" type="text/css" href="./css/editor.css" />
+		<link rel="stylesheet" type="text/css" href="./css/assets.css" />
+
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+	</head>
+	<body>
+      <div class="splash">
+         <div class="title">Mini Game Engine</div>
+         <div class="subtitle">By <a href="https://github.com/dougalcaleb" target="_blank">dougalcaleb</a></div>
+         <div class="splash-output">
+            <p>Loading...</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+         </div>
+      </div>
+		<div class="editor">
+			<div class="elements">
+				<div class="world expandable start-expanded">
+               <p class="title">World Elements</p>
+					<div class="world-element-tiles">
+						<div class="add-block">
+                     <svg viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M19,5H22V7H19V10H17V7H14V5H17V2H19V5M17,19V13H19V21H3V5H11V7H5V19H17Z" />
+                    </svg>
+                  </div>
+					</div>
+				</div>
+				<div class="scripts expandable start-expanded">
+               <p class="title">Scripts</p>
+               <div class="tiles">
+						<div class="add-script"></div>
+					</div>
+            </div>
+			</div>
+			<div class="views">
+				<div class="game-view"></div>
+				<div class="edit-view">
+               <div class="edit-view-header">
+                  <div class="edit-view-drag icon header-selected">
+                     <svg viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M13,11H18L16.5,9.5L17.92,8.08L21.84,12L17.92,15.92L16.5,14.5L18,13H13V18L14.5,16.5L15.92,17.92L12,21.84L8.08,17.92L9.5,16.5L11,18V13H6L7.5,14.5L6.08,15.92L2.16,12L6.08,8.08L7.5,9.5L6,11H11V6L9.5,7.5L8.08,6.08L12,2.16L15.92,6.08L14.5,7.5L13,6V11Z" />
+                     </svg>
+                  </div>
+                  <div class="edit-view-place icon">
+                     <svg viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M20.71,4.63L19.37,3.29C19,2.9 18.35,2.9 17.96,3.29L9,12.25L11.75,15L20.71,6.04C21.1,5.65 21.1,5 20.71,4.63M7,14A3,3 0 0,0 4,17C4,18.31 2.84,19 2,19C2.92,20.22 4.5,21 6,21A4,4 0 0,0 10,17A3,3 0 0,0 7,14Z" />
+                    </svg>
+                  </div>
+                  <div class="edit-view-erase icon">
+                     <svg viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M16.24,3.56L21.19,8.5C21.97,9.29 21.97,10.55 21.19,11.34L12,20.53C10.44,22.09 7.91,22.09 6.34,20.53L2.81,17C2.03,16.21 2.03,14.95 2.81,14.16L13.41,3.56C14.2,2.78 15.46,2.78 16.24,3.56M4.22,15.58L7.76,19.11C8.54,19.9 9.8,19.9 10.59,19.11L14.12,15.58L9.17,10.63L4.22,15.58Z" />
+                    </svg>
+                  </div>
+                  <div class="edit-view-grid other">
+                     <input type="checkbox" class="grid-toggle" checked> <span>World Grid</span>
+                  </div>
+                  <div class="edit-view-bg-colo other">
+                     <input type="color" class="world-bg-color" value="#09c4e8"> <span>World Background</span>
+                  </div>
+               </div>
+               <div class="world-edit"></div>
+            </div>
+			</div>
+			<div class="inspector">
+            <div class="global-options expandable">
+               <p class="title">Global</p>
+               <button class="save-editor-state">Save Game</button>
+               <button class="compile-all">Compile Game</button>
+            </div>
+         </div>
+		</div>
+	</body>
+
+   <script src="javascript/splash.js" type="module"></script>
+	<script src="javascript/engine.js" type="module"></script>
+	<script src="javascript/editor.js" type="module"></script>
+</html>
