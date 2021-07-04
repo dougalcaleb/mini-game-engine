@@ -45,7 +45,12 @@
             </div>
 			</div>
 			<div class="views">
-				<div class="game-view"></div>
+				<div class="game-view">
+               <div class="world-errors">
+                  <p>No camera rendering</p>
+                  <p>World not compiled</p>
+               </div>
+            </div>
 				<div class="edit-view">
                <div class="edit-view-header">
                   <div class="edit-view-drag icon header-selected">
@@ -76,9 +81,11 @@
 			<div class="inspector">
             <div class="global-options expandable start-expanded">
                <p class="title">Global</p>
-               <button class="save-editor-state">Save Game</button>
-               <button class="compile-all">Compile Game</button>
-               <button class="export-level">Export level</button>
+               <div class="buttons">
+                  <button class="compile-world">Compile World</button>
+                  <button class="compile-all">Compile Game</button>
+                  <button class="export-level">Export level</button>
+               </div>
             </div>
          </div>
 		</div>

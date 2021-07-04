@@ -8,14 +8,17 @@ export class Editor {
       this.gameView = {};
       this.editView = {
          mode: "drag",
+         world: null,
          selectedElement: null,
       };
       this.inspector = {};
 
       this.game = {
          objects: {},
+         boxes: [],
+         world: null,
          background: "#09c4e8",
-         tileSize: 16,
+         tileSize: config.tileSize,
       }
 
       this.Physics = physics;
@@ -27,29 +30,31 @@ export class Editor {
    }
 
    //? ======================================================================================================
-   //? COMMENT
+   //? GENERAL
    //? ======================================================================================================
 
    init() {
       this.Splash.add("Initializing Editor...");
       this.createDropdowns();
       this.Splash.add("Editor component 1 complete");
-      this.worldeditDrag();
+      this.setupWorld();
       this.Splash.add("Editor component 2 complete");
-      this.worldeditPaintDrag();
+      this.worldeditDrag();
       this.Splash.add("Editor component 3 complete");
-      this.worldeditEraseDrag();
+      this.worldeditPaintDrag();
       this.Splash.add("Editor component 4 complete");
-      this.headerBarsEvents();
+      this.worldeditEraseDrag();
       this.Splash.add("Editor component 5 complete");
-      this.inspectorEvents();
+      this.headerBarsEvents();
       this.Splash.add("Editor component 6 complete");
-      this.populateElements();
+      this.inspectorEvents();
       this.Splash.add("Editor component 7 complete");
-      this.setupKeybinds();
+      this.populateElements();
       this.Splash.add("Editor component 8 complete");
-      this.tryImportExistingGame();
+      this.setupKeybinds();
       this.Splash.add("Editor component 9 complete");
+      this.tryImportExistingGame();
+      this.Splash.add("Editor component 10 complete");
       this.complete();
    }
 
@@ -67,14 +72,10 @@ export class Editor {
             newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
             newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
             newTile.style.backgroundImage = `url("./images/${game.tiles[this.game.objects[el]].texture}")`;
-            document.querySelector(".world-edit").appendChild(newTile);
+            this.editView.world.appendChild(newTile);
          }
       }
    }
-
-   //? ======================================================================================================
-   //? 
-   //? ======================================================================================================
 
    createDropdowns() {
       for (let a = 0; a < document.querySelectorAll(".expandable").length; a++) {
@@ -110,6 +111,18 @@ export class Editor {
       }
    }
 
+   setupWorld() {
+      this.editView.world = document.querySelector(".world-edit");
+
+      let worldHeight = this.game.tileSize * 100;
+      let worldWidth = this.game.tileSize * 200;
+
+      this.editView.world.style.height = worldHeight + "px";
+      this.editView.world.style.width = worldWidth + "px";
+
+      this.editView.world.style.transform = `translate(20px, ${(-worldHeight + document.querySelector(".edit-view").offsetHeight - 20)}px)`;
+   }
+
    //? ======================================================================================================
    //? Elements panel
    //? ======================================================================================================
@@ -139,6 +152,9 @@ export class Editor {
       document.querySelector(".compile-all").addEventListener("click", () => {
          this.compile();
       });
+      document.querySelector(".compile-world").addEventListener("click", () => {
+         this.compileWorld();
+      });
       document.querySelector(".export-level").addEventListener("click", () => {
          console.log(this.game.objects);
       });
@@ -149,6 +165,10 @@ export class Editor {
       this.compileWorld();
       console.log("Game compile complete");
    }
+
+   //? ======================================================================================================
+   //? Compilation
+   //? ======================================================================================================
 
    compileWorld() {
       let tiles = {};
@@ -166,8 +186,6 @@ export class Editor {
          let y = 0;
          let line = 1;
          let texture = tiles[origin];
-         console.log("texture is");
-         console.log(texture);
          while (tiles[startAt[0] + "-" + (startAt[1] + y)] == tiles[origin]) { // while each tile below matches
             line = 0;
             while (tiles[(startAt[0] + line) + "-" + (startAt[1] + y)] == tiles[origin]) { // while each tile to the right matches
@@ -195,26 +213,19 @@ export class Editor {
       }
 
       let endObjs = Object.keys(boxes).length;
-      console.log(`Result: ${endObjs} world objects (${((endObjs/startObjs)*100).toFixed(1)}%)`);
+      console.log(`Result: ${endObjs} world objects (${((endObjs / startObjs) * 100).toFixed(1)}%)`);
+      
+      this.game.boxes = boxes;
 
-      let numTiles = document.querySelectorAll(".world-tile").length;
-      for (let a = 0; a < numTiles; a++) {
-         let toRemove = document.querySelectorAll(".world-tile")[0];
-         toRemove.parentElement.removeChild(toRemove);
-      }
+      // let numTiles = document.querySelectorAll(".world-tile").length;
+      // for (let a = 0; a < numTiles; a++) {
+      //    let toRemove = document.querySelectorAll(".world-tile")[0];
+      //    toRemove.parentElement.removeChild(toRemove);
+      // }
 
-      for (let a = 0; a < boxes.length; a++) {
-         let newElement = document.createElement("DIV");
-         newElement.classList.add(`world-box-${boxes[a].origin}`, "world-box");
-         let origin = boxes[a].origin.split("-");
-         let dimensions = boxes[a].dimensions.split("|");
-         newElement.style.width = (dimensions[0] * 16) + "px";
-         newElement.style.height = (dimensions[1] * 16) + "px";
-         newElement.style.transform = `translate(${(origin[0] * 16)}px, ${(origin[1] * 16)}px)`;
-         // newElement.style.backgroundColor = this.Actions.getRandomColor();
-         newElement.style.backgroundImage = `url("./images/${game.tiles[boxes[a].texture].texture}")`;
-         document.querySelector(".world-edit").appendChild(newElement);
-      }
+      console.log("World compile complete");
+
+      this.publishToGameView();
 
       /*
       start at top-leftmost gameobjects key
@@ -236,6 +247,38 @@ export class Editor {
       */
    }
 
+   publishToGameView() {
+      document.querySelector(".game-view").style.backgroundColor = this.game.background;
+      if (this.game.world) {
+         this.game.world.parentElement.removeChild(this.game.world);
+      }
+      let world = document.createElement("DIV");
+      world.classList.add("game-world");
+      world.style.height = this.game.tileSize * 100 + "px";
+      world.style.width = this.game.tileSize * 200 + "px";
+      document.querySelector(".game-view").appendChild(world);
+      this.game.world = world;
+      this.game.world.style.transform = `translate(20px, ${(-(this.game.tileSize * 100) + document.querySelector(".game-view").offsetHeight - 20)}px)`;
+      for (let a = 0; a < this.game.boxes.length; a++) {
+         let newElement = document.createElement("DIV");
+         newElement.classList.add(`world-box-${this.game.boxes[a].origin}`, "world-box");
+         let origin = this.game.boxes[a].origin.split("-");
+         let dimensions = this.game.boxes[a].dimensions.split("|");
+         newElement.style.width = (dimensions[0] * 16) + "px";
+         newElement.style.height = (dimensions[1] * 16) + "px";
+         newElement.style.transform = `translate(${(origin[0] * 16)}px, ${(origin[1] * 16)}px)`;
+         if (config.debug) {
+            newElement.style.backgroundColor = this.Actions.getRandomColor();
+         } else {
+            newElement.style.backgroundImage = `url("./images/${game.tiles[this.game.boxes[a].texture].texture}")`;
+         }
+         this.game.world.appendChild(newElement);
+      }
+      if (document.querySelector(".world-errors").children.length == 2) {
+         document.querySelector(".world-errors").children[1].style.display = "none";
+      }
+   }
+
    //? ======================================================================================================
    //? World drag events
    //? ======================================================================================================
@@ -248,28 +291,26 @@ export class Editor {
       let moveEvery = 30;
       let movement = 0;
 
-      document.querySelector(".world-edit").style.transform = `translate(20px, ${(-1600 + document.querySelector(".edit-view").offsetHeight - 20)}px)`;
-
-      document.querySelector(".world-edit").addEventListener("mousedown", (event) => {
+      this.editView.world.addEventListener("mousedown", (event) => {
          if (this.editView.mode == "drag") {
             holding = true;
             mouseStart = [event.clientX, event.clientY];
-            document.querySelector(".world-edit").style.cursor = "grabbing";
+            this.editView.world.style.cursor = "grabbing";
 
-            pos = document.querySelector(".world-edit").style.transform.split(", ");
+            pos = this.editView.world.style.transform.split(", ");
             pos[0] = parseInt(pos[0].split("(").pop());
             pos[1] = parseInt(pos[1]);
-            document.querySelector(".world-edit").style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
+            this.editView.world.style.transform = `translate(${pos[0]}px, ${pos[1]}px)`;
          }
       });
 
-      document.querySelector(".world-edit").addEventListener("mousemove", (event) => {
+      this.editView.world.addEventListener("mousemove", (event) => {
          if (holding && this.editView.mode == "drag" && movement == 0) {
             currentPos = [
                pos[0] + event.clientX - mouseStart[0],
                pos[1] + event.clientY - mouseStart[1]
             ];
-            document.querySelector(".world-edit").style.transform = `translate(${currentPos[0]}px, ${currentPos[1]}px)`;
+            this.editView.world.style.transform = `translate(${currentPos[0]}px, ${currentPos[1]}px)`;
          }
          movement = movement < moveEvery ? movement + 1 : 0;
       });
@@ -277,7 +318,7 @@ export class Editor {
       document.addEventListener("mouseup", () => {
          if (holding) {
             holding = false;
-            document.querySelector(".world-edit").style.cursor = "grab";
+            this.editView.world.style.cursor = "grab";
             pos = [
                currentPos[0],
                currentPos[1]
@@ -293,11 +334,11 @@ export class Editor {
       let prevPos = [];
       
 
-      document.querySelector(".world-edit").addEventListener("mousedown", (event) => {
+      this.editView.world.addEventListener("mousedown", (event) => {
          if (this.editView.mode == "paint" && this.editView.selectedElement != null) {
             holding = true;
 
-            let bcr = document.querySelector(".world-edit").getBoundingClientRect();
+            let bcr = this.editView.world.getBoundingClientRect();
 
             pos = [
                Math.round((event.clientX - bcr.left - (this.game.tileSize / 2)) / this.game.tileSize),
@@ -309,15 +350,15 @@ export class Editor {
                newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
                newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
                newTile.style.backgroundImage = `url("./images/${game.tiles[this.editView.selectedElement].texture}")`;
-               document.querySelector(".world-edit").appendChild(newTile);
+               this.editView.world.appendChild(newTile);
                this.game.objects[`${pos[0]}-${pos[1]}`] = this.editView.selectedElement;
             }
          }
       });
 
-      document.querySelector(".world-edit").addEventListener("mousemove", (event) => {
+      this.editView.world.addEventListener("mousemove", (event) => {
          if (holding && this.editView.mode == "paint") {
-            let bcr = document.querySelector(".world-edit").getBoundingClientRect();
+            let bcr = this.editView.world.getBoundingClientRect();
             
             pos = [
                Math.round((event.clientX - bcr.left - (this.game.tileSize / 2)) / this.game.tileSize),
@@ -329,7 +370,7 @@ export class Editor {
                newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
                newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
                newTile.style.backgroundImage = `url("./images/${game.tiles[this.editView.selectedElement].texture}")`;
-               document.querySelector(".world-edit").appendChild(newTile);
+               this.editView.world.appendChild(newTile);
                this.game.objects[`${pos[0]}-${pos[1]}`] = this.editView.selectedElement;
             }
 
@@ -348,10 +389,9 @@ export class Editor {
       let holding = false;
       let marker;
       let pos = [];
-      let unusedVar = 0;
       let prevPos = [];
 
-      document.querySelector(".world-edit").addEventListener("mousedown", (event) => {
+      this.editView.world.addEventListener("mousedown", (event) => {
          if (this.editView.mode == "erase") {
             holding = true;
             marker = document.createElement("DIV");
@@ -359,9 +399,9 @@ export class Editor {
             marker.style.top = "0px";
             marker.style.left = "0px";
             marker.style.transform = `translate(0px, 0px)`;
-            document.querySelector(".world-edit").appendChild(marker);
+            this.editView.world.appendChild(marker);
 
-            let bcr = document.querySelector(".world-edit").getBoundingClientRect();
+            let bcr = this.editView.world.getBoundingClientRect();
 
             pos = [
                Math.round((event.clientX - bcr.left - (this.game.tileSize / 2)) / this.game.tileSize),
@@ -376,9 +416,9 @@ export class Editor {
          }
       });
 
-      document.querySelector(".world-edit").addEventListener("mousemove", (event) => {
+      this.editView.world.addEventListener("mousemove", (event) => {
          if (holding && this.editView.mode == "erase") {
-            let bcr = document.querySelector(".world-edit").getBoundingClientRect();
+            let bcr = this.editView.world.getBoundingClientRect();
             
             pos = [
                Math.round((event.clientX - bcr.left - (this.game.tileSize / 2)) / this.game.tileSize),
@@ -422,13 +462,13 @@ export class Editor {
       });
       document.querySelector(".world-bg-color").addEventListener("change", () => {
          this.game.background = document.querySelector(".world-bg-color").value;
-         document.querySelector(".world-edit").style.backgroundColor = this.game.background;
+         this.editView.world.style.backgroundColor = this.game.background;
       });
       document.querySelector(".grid-toggle").addEventListener("change", () => {
          if (document.querySelector(".grid-toggle").checked) {
-            document.querySelector(".world-edit").style.backgroundImage = 'url("./images/box-2-sides.png")';
+            this.editView.world.style.backgroundImage = 'url("./images/box-2-sides.png")';
          } else {
-            document.querySelector(".world-edit").style.backgroundImage = "none";
+            this.editView.world.style.backgroundImage = "none";
          }
       });
    }

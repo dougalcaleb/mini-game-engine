@@ -80,6 +80,22 @@
    position: relative;
 	background: common.$ed_gray_medium;
    margin: 5px;
+   .buttons {
+      display: flex;
+      flex-direction: column;
+      width: 50%;
+      margin: auto;
+      button {
+         background: common.$theme-black-dark;
+         border: none;
+         outline: none;
+         color: white;
+         padding: 10px;
+         margin-bottom: 10px;
+         cursor: pointer;
+      }
+   }
+   
    .title {
       position: absolute;
       left: 8px;
@@ -123,8 +139,8 @@
    .world-edit {
       background-image: url("../images/box-2-sides.png");
       background-color: common.$world-bg-default;
-      height: 1600px;
-      width: 3200px;
+      // height: 1600px;
+      // width: 3200px;
       cursor: grab;
       position: absolute;
       top: 0;
@@ -195,8 +211,6 @@
 }
 
 .header-selected {
-   // border: 1px solid common.$theme-blue-dark;
-   // box-sizing: border-box;
    background: common.$theme-blue-dark; 
 }
 
@@ -219,5 +233,23 @@
 .world-box {
    height: 16px;
    width: 16px;
+   position: absolute;
+}
+
+.game-view {
+   .world-errors {
+      margin: auto;
+      position: absolute;
+      left: 0;
+      right: 0;
+      z-index: 6;
+      p {
+         font-family: 'Courier New', Courier, monospace;
+         text-align: center;
+      }
+   }
+}
+
+.game-world {
    position: absolute;
 }

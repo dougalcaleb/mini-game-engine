@@ -70,6 +70,21 @@
   background: #3e3e3e;
   margin: 5px;
 }
+.expandable .buttons {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  margin: auto;
+}
+.expandable .buttons button {
+  background: #070707;
+  border: none;
+  outline: none;
+  color: white;
+  padding: 10px;
+  margin-bottom: 10px;
+  cursor: pointer;
+}
 .expandable .title {
   position: absolute;
   left: 8px;
@@ -111,8 +126,6 @@
 .edit-view .world-edit {
   background-image: url("../images/box-2-sides.png");
   background-color: #09c4e8;
-  height: 1600px;
-  width: 3200px;
   cursor: grab;
   position: absolute;
   top: 0;
@@ -201,5 +214,21 @@
 .world-box {
   height: 16px;
   width: 16px;
+  position: absolute;
+}
+
+.game-view .world-errors {
+  margin: auto;
+  position: absolute;
+  left: 0;
+  right: 0;
+  z-index: 6;
+}
+.game-view .world-errors p {
+  font-family: "Courier New", Courier, monospace;
+  text-align: center;
+}
+
+.game-world {
   position: absolute;
 }

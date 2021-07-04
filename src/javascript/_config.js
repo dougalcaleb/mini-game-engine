@@ -1,4 +1,5 @@
 export const config = {
+   debug: false,
    keybinds: [
       { action: "editview.move", key: "m", alternate: "1" },
       { action: "editview.paint", key: "p", alternate: "2" },
@@ -12,4 +13,5 @@ export const config = {
    ],
    editviewMoveStep: 25,
    fastMovementMultiplier: 3,
+   tileSize: 16,
 }
