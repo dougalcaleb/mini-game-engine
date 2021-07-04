@@ -1,12 +1,9 @@
+import { level } from "./_level.js";
 export const game = {
    compiled: false,
+   hasLevel: false,
    title: "My First Game",
    tiles: [
-      // {
-      //    name: "",
-      //    texture: "",
-      //    hitbox: true,
-      // },
       {
          name: "Grass",
          texture: "grass.png",
