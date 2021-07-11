@@ -2,6 +2,8 @@ import {game} from "../../game/game.js";
 import { Editor } from "./editor.js";
 import { Splash } from "./splash.js";
 import { Physics } from "./physics.js";
+import { Actions } from "./actions.js";
+import { config } from "./_config.js";
 
 class GameEngine {
 	constructor() {
@@ -14,24 +16,60 @@ class GameEngine {
       this.pageIsLoaded = false;
       this.startedInt = false;
 
+      this.gameFileRef = null;
+
       this.Splash = new Splash();
+      this.Actions = new Actions();
 	}
 
 	/** Initializes the game engine */
-	init() {
-		// console.log("Initializing GameEngine component");
+	async init() {
       this.Splash.add("Initializing GameEngine...");
-      this.Splash.run();
 
-      if (game.compiled) {
-         this.createPhysicsEngine();
-			this.loadGame();
-		} else {
-         this.createPhysicsEngine();
-         this.loadEditor();
+      let gameFile = await this.savefile();
+      if (gameFile == "ABORTED") {
+         this.init();
+      } else {
+         if (gameFile == undefined) {
+            gameFile = {};
+            Object.assign(gameFile, game);
+         }
+         document.title = `${gameFile.title} | MGE`;
+         if (gameFile.compiled) {
+            this.createPhysicsEngine();
+            this.loadGame();
+         } else {
+            this.createPhysicsEngine();
+            this.loadEditor(gameFile);
+         }
+         
+         this.complete();
       }
-      
-      this.complete();
+   }
+
+   async savefile() {
+      return new Promise((resolve, reject) => {
+         this.promptForSaveFile().then(
+            (gameFile) => {
+               // SAVEFILE GIVEN
+               if (gameFile == "ABORTED") {
+                  resolve("ABORTED");
+               } else {                  
+                  resolve(gameFile);
+                  this.Splash.add("Loading savefile...");
+                  this.Splash.run();
+               }
+            }, (msg) => {
+               // NEW PROJECT
+               if (msg == "SAVE_CANCELED") {
+                  resolve("ABORTED");
+               } else {
+                  resolve();
+                  this.Splash.add("Starting new project");
+                  this.Splash.run();
+               }
+         });
+      });
    }
    
    complete() {
@@ -40,9 +78,9 @@ class GameEngine {
    }
 
 	/** Loads the game and editor */
-   loadEditor() {
+   loadEditor(gameFile) {
       this.Splash.add("Preparing Editor...");
-		this.editor = new Editor(this.Splash, this.Physics);
+		this.editor = new Editor(this.Splash, this.Physics, {gameFileRef: this.gameFileRef, gameFile: gameFile});
 		this.editor.init();
    }
    
@@ -53,7 +91,89 @@ class GameEngine {
    }
 
 	/** Loads a compiled game */
-	loadGame() {}
+   loadGame(game) { }
+   
+   //? ======================================================================================================
+   //? Load/Save
+   //? ======================================================================================================
+
+   async promptForSaveFile() {
+      return new Promise((resolve, reject) => {
+         let ABORT = new AbortController();
+         // Load savefile
+         document.querySelector(".prompt-load-savefile").addEventListener("click", async () => {
+            let retrievedFile = await this.loadSavefile();
+            ABORT.abort();
+            resolve(retrievedFile);
+         }, {signal: ABORT.signal});
+         // New project
+         document.querySelector(".prompt-new-project").addEventListener("click", async () => {
+            let msg = await this.saveNewProject();
+            ABORT.abort();
+            reject(msg);
+         }, {signal: ABORT.signal});
+      });
+   }
+
+   async saveNewProject() {
+      try {
+         this.gameFileRef = await window.showSaveFilePicker({
+            suggestedName: `${game.title}.${config.fileExtension}`,
+            types: [{accept: {"text/plain": [`.${config.fileExtension}`]}, description: "Game Engine Savefile"}]
+         });
+         const file = await this.gameFileRef.getFile();
+         await this.saveToLoadedSavefile(this.gameFileRef, game);
+      } catch (e) {
+         console.warn(e);
+         return "SAVE_CANCELED";
+      }
+   }
+
+   async loadSavefile() {
+      try {
+         let abort = false;
+         this.gameFileRef = await window.showOpenFilePicker();
+         this.gameFileRef = this.gameFileRef[0];
+         if (this.gameFileRef.name.split(".").pop() != config.fileExtension) {
+            await this.Actions.actionPopup("INCORRECT FILE TYPE", "warn", `This file is not a .${config.fileExtension} savefile. Are you sure you want to use this file?`, [
+               {
+                  text: "Continue",
+                  style: "primary",
+                  action: () => {
+                     this.Actions.destroyPopup();
+                  }
+               },
+               {
+                  text: "Cancel",
+                  style: "critical",
+                  action: () => {
+                     abort = true;
+                     this.Actions.destroyPopup();
+                  }
+               }
+            ]);
+         }
+         let file = await this.gameFileRef.getFile();
+         let gameFileStringified = await file.text();
+         if (abort) {
+            return "ABORTED";
+         }
+         return JSON.parse(gameFileStringified);
+      } catch (e) {
+         console.warn(e);
+         return "ABORTED";
+      }
+   }
+
+   async saveToLoadedSavefile(ref, contents = this.gameFile) {
+      if (typeof ref !== null) {
+         if ((await this.gameFileRef.queryPermission()) === "granted") {
+            const writable = await this.gameFileRef.createWritable();
+            await writable.write(JSON.stringify(contents));
+            await writable.close();
+         }
+      }
+   }
 }
 
 const Engine = new GameEngine();

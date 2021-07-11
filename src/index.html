@@ -8,7 +8,7 @@
 
       <link rel="preconnect" href="https://fonts.googleapis.com">
       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Roboto&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+      <link href="https://fonts.googleapis.com/css2?family=Miriam+Libre:wght@700&family=Montserrat:wght@500&family=Ubuntu&display=swap" rel="stylesheet">
 
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
@@ -25,6 +25,9 @@
             <p>&nbsp;</p>
          </div>
       </div>
+
+      <!-- Start editor -->
+
 		<div class="editor">
 			<div class="elements">
 				<div class="world expandable start-expanded">
@@ -84,11 +87,40 @@
                <div class="buttons">
                   <button class="compile-world">Compile World</button>
                   <button class="compile-all">Compile Game</button>
-                  <button class="export-level">Export level</button>
+                  <button class="save-editor">Save</button>
                </div>
             </div>
          </div>
 		</div>
+
+      <!-- End editor -->
+
+      <!-- Start prompt -->
+
+      <div class="savefile-prompt">
+         <h1>LOAD SAVEFILE</h1>
+
+         <p>Would you like to load an existing savefile or start a new project?</p>
+         <div class="prompt-button-wrap">
+            <button class="prompt-load-savefile">Load Existing</button>
+            <button class="prompt-new-project">New Project</button>
+         </div>
+      </div>
+
+      <!-- <div class="error-popup">
+         <h2>Error</h2>
+         <p>Unspecified Error</p>
+         <div class="error-btn-wrap">
+            <button>Cancel</button>
+            <button>Accept</button>
+            <button>third</button>
+         </div> -->
+        
+      </div>
+      
+      <!-- End prompt -->
+
+
 	</body>
 
    <script src="javascript/splash.js" type="module"></script>

@@ -89,7 +89,93 @@ export class Actions {
 			color += letters[Math.floor(Math.random() * 16)];
 		}
 		return color;
-	}
+   }
+   
+   /**
+    * 
+    * @param {*} title The title to display on the error popup
+    * @param {*} style The style of the popup (primary, warn, critical)
+    * @param {*} message Explanation text on the body of the message
+    * @param {*} buttons Array of objects defining buttons containing fields "text" [str], "style" [str], and "action" [func]
+    */
+   async actionPopup(title = "ERROR", style = "primary", message = "Unspecified", buttons = [{ text: "Cancel", style: "primary", action: () => { } }]) {
+      return new Promise((resolve, reject) => {
+         let popup = document.createElement("DIV");
+         popup.innerHTML = `
+         <div class="overlay"></div>
+         <div class="popup-box-wrap">
+            <h2>${title}</h2>
+            <p>${message}</p>
+            <div class="error-btn-wrap"></div>
+         </div>
+         `;
+         popup.classList.add("action-popup");
+         switch (style) {
+            case "primary":
+               popup.classList.add("popup-primary");
+               break;
+            case "warn":
+               popup.classList.add("popup-warn");
+               break;
+            case "critical":
+               popup.classList.add("popup-critical");
+               break;
+         }
+         document.querySelector("body").appendChild(popup);
+         for (let a = 0; a < buttons.length; a++) {
+            let btn = document.createElement("BUTTON");
+            btn.innerText = buttons[a].text;
+            switch (buttons[a].style) {
+               case "primary":
+                  btn.classList.add("error-btn-primary");
+                  break;
+               case "warn":
+                  btn.classList.add("error-btn-warn");
+                  break;
+               case "critical":
+                  btn.classList.add("error-btn-critical");
+                  break;
+            }
+            popup.children[1].children[2].appendChild(btn);
+            btn.addEventListener("click", () => {
+               buttons[a].action();
+               resolve();
+            });
+         }
+      });
+   }
+
+   destroyPopup() {
+      let popup = document.querySelector(".action-popup");
+      popup.parentElement.removeChild(popup);
+   }
+
+   /* ex:
+   this.Actions.actionPopup("TEST MSG", "This is a message for an action popup", [
+         {
+            text: "Btn1",
+            style: "primary",
+            action: () => {
+               console.log("BTN1");
+            }
+         },
+         {
+            text: "Btn2",
+            style: "warn",
+            action: () => {
+               console.log("BTN2");
+            }
+         },
+         {
+            text: "Btn3",
+            style: "critical",
+            action: () => {
+               console.log("BTN3");
+            }
+         },
+      ]);
+
+   */
 
 	DEBUG(output) {
 		output.forEach((text) => {

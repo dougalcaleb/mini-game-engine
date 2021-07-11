@@ -3,7 +3,7 @@ import { config } from "./_config.js";
 import { Actions } from "./actions.js";
 
 export class Editor {
-   constructor(splash, physics) {
+   constructor(splash, physics, givenGame) {
       this.elements = {};
       this.gameView = {};
       this.editView = {
@@ -14,12 +14,14 @@ export class Editor {
       this.inspector = {};
 
       this.game = {
-         objects: {},
          boxes: [],
          world: null,
          background: "#09c4e8",
          tileSize: config.tileSize,
       }
+
+      this.gameFile = givenGame.gameFile;
+      this.gameFileRef = givenGame.gameFileRef,
 
       this.Physics = physics;
       this.Splash = splash;
@@ -33,8 +35,16 @@ export class Editor {
    //? GENERAL
    //? ======================================================================================================
 
+   /**
+    * TODO:
+    * - Verify that all other components work with the new save system
+    * - Rework tryImportExistingGame for the new save system
+    * - Ensure that game datastructures sync up well
+    * - Verify that GameEngine only loads editor as necessary
+    */
+
    init() {
-      this.Splash.add("Initializing Editor...");
+      this.Splash.add("Initializing Editor...");    
       this.createDropdowns();
       this.Splash.add("Editor component 1 complete");
       this.setupWorld();
@@ -48,13 +58,13 @@ export class Editor {
       this.headerBarsEvents();
       this.Splash.add("Editor component 6 complete");
       this.inspectorEvents();
-      this.Splash.add("Editor component 7 complete");
-      this.populateElements();
-      this.Splash.add("Editor component 8 complete");
-      this.setupKeybinds();
-      this.Splash.add("Editor component 9 complete");
-      this.tryImportExistingGame();
-      this.Splash.add("Editor component 10 complete");
+      // this.Splash.add("Editor component 7 complete");
+      // this.populateElements();
+      // this.Splash.add("Editor component 8 complete");
+      // this.setupKeybinds();
+      // this.Splash.add("Editor component 9 complete");
+      // this.tryImportExistingGame();
+      // this.Splash.add("Editor component 10 complete");
       this.complete();
    }
 
@@ -62,20 +72,20 @@ export class Editor {
       this.Splash.add("Editor Ready");
    }
 
-   tryImportExistingGame() {
-      if (game.hasLevel) {
-         this.Splash.add("Found existing game. Importing...");
-         this.game.objects = game.level;
-         for (const el in this.game.objects) {
-            let pos = el.toString().split("-");
-            let newTile = document.createElement("DIV");
-            newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
-            newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
-            newTile.style.backgroundImage = `url("./images/${game.tiles[this.game.objects[el]].texture}")`;
-            this.editView.world.appendChild(newTile);
-         }
-      }
-   }
+   // tryImportExistingGame() {
+   //    if (this.gameFile.importedFromSaveFile) {
+   //       this.Splash.add("Found existing game. Importing...");
+   //       this.gameFile.level = this.gameFile.level;
+   //       for (const el in this.gameFile.level) {
+   //          let pos = el.toString().split("-");
+   //          let newTile = document.createElement("DIV");
+   //          newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
+   //          newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+   //          newTile.style.backgroundImage = `url("./images/${game.tiles[this.gameFile.level[el]].texture}")`;
+   //          this.editView.world.appendChild(newTile);
+   //       }
+   //    }
+   // }
 
    createDropdowns() {
       for (let a = 0; a < document.querySelectorAll(".expandable").length; a++) {
@@ -155,8 +165,29 @@ export class Editor {
       document.querySelector(".compile-world").addEventListener("click", () => {
          this.compileWorld();
       });
-      document.querySelector(".export-level").addEventListener("click", () => {
-         console.log(this.game.objects);
+      document.querySelector(".save-editor").addEventListener("click", async () => {
+         let res = await this.saveToLoadedSavefile();
+         if (res) {
+            await this.Actions.actionPopup("SUCCESS", "primary", `Your game has been saved.`, [
+               {
+                  text: "OK",
+                  style: "primary",
+                  action: () => {
+                     this.Actions.destroyPopup();
+                  }
+               }
+            ]);
+         } else {
+            await this.Actions.actionPopup("ERROR", "critical", `Your game could not be saved. Ensure that the savefile still exists and that Chrome has read/write priveleges for files on your computer.`, [
+               {
+                  text: "OK",
+                  style: "primary",
+                  action: () => {
+                     this.Actions.destroyPopup();
+                  }
+               }
+            ]);
+         }
       });
    }
 
@@ -167,13 +198,39 @@ export class Editor {
    }
 
    //? ======================================================================================================
+   //? Save
+   //? ======================================================================================================
+
+   async saveToLoadedSavefile(contents = this.gameFile) {
+      try {
+         if (typeof this.gameFileRef !== null) {
+            if ((await this.gameFileRef.queryPermission()) === "granted") {
+               const writable = await this.gameFileRef.createWritable();
+               await writable.write(JSON.stringify(contents));
+               await writable.close();
+               return true;
+            } else {
+               console.warn("Write permission not granted");
+               return false;
+            }
+         } else {
+            console.warn("Null GameFileRef");
+            return false;
+         }
+      } catch (e) {
+         console.error(e);
+         return false;
+      }
+   }
+
+   //? ======================================================================================================
    //? Compilation
    //? ======================================================================================================
 
    compileWorld() {
       let tiles = {};
       let boxes = [];
-      Object.assign(tiles, this.game.objects);
+      Object.assign(tiles, this.gameFile.level);
       let startObjs = Object.keys(tiles).length;
 
       console.log("Beginning world compile");
@@ -328,7 +385,6 @@ export class Editor {
    }
 
    worldeditPaintDrag() {
-      
       let holding = false;
       let pos = [];
       let prevPos = [];
@@ -345,13 +401,13 @@ export class Editor {
                Math.round((event.clientY - bcr.top - (this.game.tileSize / 2)) / this.game.tileSize),
             ];
 
-            if (this.game.objects[`${pos[0]}-${pos[1]}`] == undefined) {
+            if (this.gameFile.level[`${pos[0]}-${pos[1]}`] == undefined) {
                let newTile = document.createElement("DIV");
                newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
                newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
                newTile.style.backgroundImage = `url("./images/${game.tiles[this.editView.selectedElement].texture}")`;
                this.editView.world.appendChild(newTile);
-               this.game.objects[`${pos[0]}-${pos[1]}`] = this.editView.selectedElement;
+               this.gameFile.level[`${pos[0]}-${pos[1]}`] = this.editView.selectedElement;
             }
          }
       });
@@ -365,13 +421,13 @@ export class Editor {
                Math.round((event.clientY - bcr.top - (this.game.tileSize / 2)) / this.game.tileSize),
             ];
 
-            if ((pos[0] != prevPos[0] || pos[1] != prevPos[1]) && (this.game.objects[`${pos[0]}-${pos[1]}`] == undefined)) {
+            if ((pos[0] != prevPos[0] || pos[1] != prevPos[1]) && (this.gameFile.level[`${pos[0]}-${pos[1]}`] == undefined)) {
                let newTile = document.createElement("DIV");
                newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
                newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
                newTile.style.backgroundImage = `url("./images/${game.tiles[this.editView.selectedElement].texture}")`;
                this.editView.world.appendChild(newTile);
-               this.game.objects[`${pos[0]}-${pos[1]}`] = this.editView.selectedElement;
+               this.gameFile.level[`${pos[0]}-${pos[1]}`] = this.editView.selectedElement;
             }
 
             prevPos = [pos[0], pos[1]];
@@ -408,10 +464,10 @@ export class Editor {
                Math.round((event.clientY - bcr.top - (this.game.tileSize / 2)) / this.game.tileSize),
             ];
 
-            if (this.game.objects[`${pos[0]}-${pos[1]}`] != undefined) {
+            if (this.gameFile.level[`${pos[0]}-${pos[1]}`] != undefined) {
                let toRemove = document.querySelector(`.world-tile-id-${pos[0]}-${pos[1]}`);
                toRemove.parentElement.removeChild(toRemove);
-               delete this.game.objects[`${pos[0]}-${pos[1]}`];
+               delete this.gameFile.level[`${pos[0]}-${pos[1]}`];
             }
          }
       });
@@ -425,10 +481,10 @@ export class Editor {
                Math.round((event.clientY - bcr.top - (this.game.tileSize / 2)) / this.game.tileSize),
             ];
 
-            if ((pos[0] != prevPos[0] || pos[1] != prevPos[1]) && (this.game.objects[`${pos[0]}-${pos[1]}`] != undefined)) {
+            if ((pos[0] != prevPos[0] || pos[1] != prevPos[1]) && (this.gameFile.level[`${pos[0]}-${pos[1]}`] != undefined)) {
 					let toRemove = document.querySelector(`.world-tile-id-${pos[0]}-${pos[1]}`);
 					toRemove.parentElement.removeChild(toRemove);
-					delete this.game.objects[`${pos[0]}-${pos[1]}`];
+					delete this.gameFile.level[`${pos[0]}-${pos[1]}`];
             }
 
             prevPos = [pos[0], pos[1]];
@@ -508,7 +564,7 @@ export class Editor {
                this.Actions.enableQuickViewMovement();
                break;
             case config.keybinds[config.keybinds.length - 1].key:
-               this.Actions.DEBUG([this.game.objects]);
+               this.Actions.DEBUG([this.gameFile.level]);
          }
       });
 

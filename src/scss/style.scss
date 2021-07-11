@@ -1,73 +1,236 @@
+@use "common";
+
 * {
-   user-select: none;
+	user-select: none;
 }
 
 body {
-   margin: 0;
-   overflow: hidden;
+	margin: 0;
+	overflow: hidden;
+}
+
+.action-popup {
+   height: 100%;
+   width: 100%;
+   position: fixed;
+   left: 0;
+   top: 0;
+   z-index: 99999999999999;
+   .overlay {
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      background: rgba(47, 47, 47, 0.7);
+      animation: 0.3s popupOverlayIn;
+   }
+	.popup-box-wrap {
+		// height: 100px;
+		width: min(60vw, 1000px);
+		background: common.$theme-black-light;
+		position: absolute;
+		margin: auto;
+		left: 0;
+		right: 0;
+		top: 15px;
+		z-index: 10000;
+		border-radius: 10px;
+      box-shadow: 0px 10px 10px black;
+      animation: 0.3s popupBoxIn;
+
+		h2 {
+			font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+			text-align: center;
+			margin: 0;
+		}
+		p {
+			text-align: center;
+         color: common.$theme-white;
+         font-family: common.$theme-font-paragraph;
+         padding-left: 10px;
+         padding-right: 10px;
+		}
+		.error-btn-wrap {
+			display: flex;
+			justify-content: space-evenly;
+			padding: 15px;
+			button {
+				border-radius: 5px;
+				outline: none;
+				// background: transparent;
+				cursor: pointer;
+				padding: 7px;
+				padding-left: 20px;
+				padding-right: 20px;
+				font-family: common.$theme-font-button;
+			}
+		}
+	}
+}
+
+.popup-primary .popup-box-wrap h2 {
+   color: common.$theme-white;
+}
+
+.popup-warn .popup-box-wrap h2 {
+   color: #888802;
+}
+
+.popup-critical .popup-box-wrap h2 {
+   color: common.$theme-red;
+}
+
+.error-btn-primary {
+	border: 3px solid common.$theme-blue-dark;
+	background: common.$theme-blue-dark;
+	color: common.$theme-white;
+}
+.error-btn-warn {
+	border: 3px solid #888802;
+	background: #888802;
+	color: common.$theme-white;
+}
+.error-btn-critical {
+	border: 3px solid common.$theme-red;
+	background: common.$theme-red;
+	color: common.$theme-white;
+}
+
+.savefile-prompt {
+	height: min(40vh, 400px);
+	width: min(40vw, 800px);
+	background: common.$theme-black-light;
+	box-shadow: 0px 10px 10px black;
+	position: fixed;
+	border-radius: 10px;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	margin: auto;
+	z-index: 9999;
+	h1 {
+		font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+		color: white;
+		text-align: center;
+	}
+	p {
+		color: common.$theme-white;
+		text-align: center;
+		font-family: "Courier New", Courier, monospace;
+	}
+	.prompt-button-wrap {
+		width: 100%;
+		position: absolute;
+		display: flex;
+		justify-content: space-evenly;
+		bottom: 15px;
+		button {
+			border: none;
+			padding: 10px;
+			padding-left: 20px;
+			padding-right: 20px;
+			outline: none;
+			// background: common.$theme-blue-dark;
+			background: transparent;
+			cursor: pointer;
+			border: 3px solid common.$theme-blue-dark;
+			border-radius: 5px;
+			color: common.$theme-white;
+			font-family: common.$theme-font-button, "Segoe UI", sans-serif, monospace;
+		}
+	}
 }
 
 .splash {
-   height: 100%;
-   width: 100%;
-   background: #080808;
-   position: fixed;
-   z-index: 9999999999;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-   flex-direction: column;
-   .title {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      color: #efefef;
-      font-size: min(4vw, 4vh);
-   }
-   .subtitle {
-      color: #ccc;
-      font-family: 'Courier New', Courier, monospace;
-      margin: 25px;
-      a {
-         color: #00b7ff;
-         text-decoration: none;
-         &:visited {
-            color: #00b7ff;
-         }
-      }
-   }
-   .splash-output {
-      font-family: monospace;
-      color: #575656;
-      text-align: center;
-      > p {
-         // transition: 0.1s;
-         &:nth-child(2) {
-            opacity: 0.8;
-         }
-         &:nth-child(3) {
-            opacity: 0.6;
-         }
-         &:nth-child(4) {
-            opacity: 0.4;
-         }
-         &:nth-child(5) {
-            opacity: 0.2;
-         }
-         &:nth-child(6) {
-            opacity: 0;
-         }
-      }
-   }
+	height: 100%;
+	width: 100%;
+	background: #080808;
+	position: fixed;
+	z-index: 999;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	.title {
+		font-family: common.$theme-font-title;
+		color: #efefef;
+		font-size: min(4vw, 4vh);
+	}
+	.subtitle {
+		color: #ccc;
+		font-family: common.$theme-font-subtitle;
+		margin: 25px;
+		a {
+			color: #00b7ff;
+			text-decoration: none;
+			&:visited {
+				color: #00b7ff;
+			}
+		}
+	}
+	.splash-output {
+		font-family: monospace;
+		color: #575656;
+		text-align: center;
+		> p {
+			// transition: 0.1s;
+			&:nth-child(2) {
+				opacity: 0.8;
+			}
+			&:nth-child(3) {
+				opacity: 0.6;
+			}
+			&:nth-child(4) {
+				opacity: 0.4;
+			}
+			&:nth-child(5) {
+				opacity: 0.2;
+			}
+			&:nth-child(6) {
+				opacity: 0;
+			}
+		}
+	}
 }
 
 @keyframes hideSplash {
+	from {
+		opacity: 1;
+		visibility: visible;
+		height: 100%;
+	}
+	to {
+		opacity: 0;
+		visibility: hidden;
+		height: 110%;
+	}
+}
+
+@keyframes popupOverlayIn {
+   from {
+      opacity: 0;
+   }
+   to {
+      opacity: 1;
+   }
+}
+
+@keyframes popupBoxIn {
+   from {
+      top: 0px;
+   }
+   to {
+      top: 15px;
+   }
+}
+
+@keyframes savefilePromptOut {
    from {
       opacity: 1;
-      visibility: visible;
-      height: 100%;
+      top: 0;
    }
    to {
       opacity: 0;
-      visibility: hidden;
-      height: 110%;
+      top: 50px;
    }
 }

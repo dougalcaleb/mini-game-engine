@@ -7,25 +7,155 @@ body {
   overflow: hidden;
 }
 
+.action-popup {
+  height: 100%;
+  width: 100%;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 99999999999999;
+}
+.action-popup .overlay {
+  height: 100%;
+  width: 100%;
+  position: absolute;
+  background: rgba(47, 47, 47, 0.7);
+  animation: 0.3s popupOverlayIn;
+}
+.action-popup .popup-box-wrap {
+  width: min(60vw, 1000px);
+  background: #282828;
+  position: absolute;
+  margin: auto;
+  left: 0;
+  right: 0;
+  top: 15px;
+  z-index: 10000;
+  border-radius: 10px;
+  box-shadow: 0px 10px 10px black;
+  animation: 0.3s popupBoxIn;
+}
+.action-popup .popup-box-wrap h2 {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  text-align: center;
+  margin: 0;
+}
+.action-popup .popup-box-wrap p {
+  text-align: center;
+  color: #e8e8e8;
+  font-family: "Ubuntu", sans-serif;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.action-popup .popup-box-wrap .error-btn-wrap {
+  display: flex;
+  justify-content: space-evenly;
+  padding: 15px;
+}
+.action-popup .popup-box-wrap .error-btn-wrap button {
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+  padding: 7px;
+  padding-left: 20px;
+  padding-right: 20px;
+  font-family: "Miriam Libre", "Segoe UI", sans-serif, monospace;
+}
+
+.popup-primary .popup-box-wrap h2 {
+  color: #e8e8e8;
+}
+
+.popup-warn .popup-box-wrap h2 {
+  color: #888802;
+}
+
+.popup-critical .popup-box-wrap h2 {
+  color: #b52626;
+}
+
+.error-btn-primary {
+  border: 3px solid #006b8c;
+  background: #006b8c;
+  color: #e8e8e8;
+}
+
+.error-btn-warn {
+  border: 3px solid #888802;
+  background: #888802;
+  color: #e8e8e8;
+}
+
+.error-btn-critical {
+  border: 3px solid #b52626;
+  background: #b52626;
+  color: #e8e8e8;
+}
+
+.savefile-prompt {
+  height: min(40vh, 400px);
+  width: min(40vw, 800px);
+  background: #282828;
+  box-shadow: 0px 10px 10px black;
+  position: fixed;
+  border-radius: 10px;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: auto;
+  z-index: 9999;
+}
+.savefile-prompt h1 {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  color: white;
+  text-align: center;
+}
+.savefile-prompt p {
+  color: #e8e8e8;
+  text-align: center;
+  font-family: "Courier New", Courier, monospace;
+}
+.savefile-prompt .prompt-button-wrap {
+  width: 100%;
+  position: absolute;
+  display: flex;
+  justify-content: space-evenly;
+  bottom: 15px;
+}
+.savefile-prompt .prompt-button-wrap button {
+  border: none;
+  padding: 10px;
+  padding-left: 20px;
+  padding-right: 20px;
+  outline: none;
+  background: transparent;
+  cursor: pointer;
+  border: 3px solid #006b8c;
+  border-radius: 5px;
+  color: #e8e8e8;
+  font-family: "Miriam Libre", "Segoe UI", sans-serif, monospace, "Segoe UI", sans-serif, monospace;
+}
+
 .splash {
   height: 100%;
   width: 100%;
   background: #080808;
   position: fixed;
-  z-index: 9999999999;
+  z-index: 999;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
 }
 .splash .title {
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Miriam Libre", "Segoe UI", sans-serif, monospace;
   color: #efefef;
   font-size: min(4vw, 4vh);
 }
 .splash .subtitle {
   color: #ccc;
-  font-family: "Courier New", Courier, monospace;
+  font-family: "Montserrat";
   margin: 25px;
 }
 .splash .subtitle a {
@@ -66,5 +196,31 @@ body {
     opacity: 0;
     visibility: hidden;
     height: 110%;
+  }
+}
+@keyframes popupOverlayIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes popupBoxIn {
+  from {
+    top: 0px;
+  }
+  to {
+    top: 15px;
+  }
+}
+@keyframes savefilePromptOut {
+  from {
+    opacity: 1;
+    top: 0;
+  }
+  to {
+    opacity: 0;
+    top: 50px;
   }
 }

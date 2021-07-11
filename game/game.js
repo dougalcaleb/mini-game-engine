@@ -1,7 +1,7 @@
 import { level } from "./_level.js";
 export const game = {
    compiled: false,
-   hasLevel: false,
+   imprtedFromSaveFile: false,
    title: "My First Game",
    tiles: [
       {
