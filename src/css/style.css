@@ -115,6 +115,8 @@ body {
   color: #e8e8e8;
   text-align: center;
   font-family: "Courier New", Courier, monospace;
+  padding-left: 15px;
+  padding-right: 15px;
 }
 .savefile-prompt .prompt-button-wrap {
   width: 100%;
@@ -201,17 +203,21 @@ body {
 @keyframes popupOverlayIn {
   from {
     opacity: 0;
+    visibility: hidden;
   }
   to {
     opacity: 1;
+    visibility: visible;
   }
 }
 @keyframes popupBoxIn {
   from {
     top: 0px;
+    visibility: hidden;
   }
   to {
     top: 15px;
+    visibility: visible;
   }
 }
 @keyframes savefilePromptOut {
@@ -222,5 +228,6 @@ body {
   to {
     opacity: 0;
     top: 50px;
+    visibility: hidden;
   }
 }

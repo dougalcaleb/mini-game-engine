@@ -20,6 +20,8 @@ export class Editor {
          tileSize: config.tileSize,
       }
 
+      this.logs = {};
+
       this.gameFile = givenGame.gameFile;
       this.gameFileRef = givenGame.gameFileRef,
 
@@ -37,6 +39,7 @@ export class Editor {
 
    /**
     * TODO:
+    * - Finish restyle overhaul
     * - Verify that all other components work with the new save system
     * - Rework tryImportExistingGame for the new save system
     * - Ensure that game datastructures sync up well
@@ -44,7 +47,7 @@ export class Editor {
     */
 
    init() {
-      this.Splash.add("Initializing Editor...");    
+      this.Splash.add("Initializing Editor...");
       this.createDropdowns();
       this.Splash.add("Editor component 1 complete");
       this.setupWorld();
@@ -58,13 +61,13 @@ export class Editor {
       this.headerBarsEvents();
       this.Splash.add("Editor component 6 complete");
       this.inspectorEvents();
-      // this.Splash.add("Editor component 7 complete");
-      // this.populateElements();
-      // this.Splash.add("Editor component 8 complete");
-      // this.setupKeybinds();
-      // this.Splash.add("Editor component 9 complete");
-      // this.tryImportExistingGame();
-      // this.Splash.add("Editor component 10 complete");
+      this.Splash.add("Editor component 7 complete");
+      this.populateElements();
+      this.Splash.add("Editor component 8 complete");
+      this.setupKeybinds();
+      this.Splash.add("Editor component 9 complete");
+      this.applySavegame();
+      this.Splash.add("Finished loading savefile");
       this.complete();
    }
 
@@ -72,20 +75,16 @@ export class Editor {
       this.Splash.add("Editor Ready");
    }
 
-   // tryImportExistingGame() {
-   //    if (this.gameFile.importedFromSaveFile) {
-   //       this.Splash.add("Found existing game. Importing...");
-   //       this.gameFile.level = this.gameFile.level;
-   //       for (const el in this.gameFile.level) {
-   //          let pos = el.toString().split("-");
-   //          let newTile = document.createElement("DIV");
-   //          newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
-   //          newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
-   //          newTile.style.backgroundImage = `url("./images/${game.tiles[this.gameFile.level[el]].texture}")`;
-   //          this.editView.world.appendChild(newTile);
-   //       }
-   //    }
-   // }
+   applySavegame() {
+      for (const el in this.gameFile.level) {
+         let pos = el.toString().split("-");
+         let newTile = document.createElement("DIV");
+         newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
+         newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+         newTile.style.backgroundImage = `url("./images/${game.tiles[this.gameFile.level[el]].texture}")`;
+         this.editView.world.appendChild(newTile);
+      }
+   }
 
    createDropdowns() {
       for (let a = 0; a < document.querySelectorAll(".expandable").length; a++) {
@@ -138,18 +137,18 @@ export class Editor {
    //? ======================================================================================================
 
    populateElements() {
-      for (let a = 0; a < game.tiles.length; a++) {
+      for (let a = 0; a < this.gameFile.tiles.length; a++) {
          let element = document.createElement("DIV");
          element.classList.add("world-element-tile");
-         element.style.backgroundImage = `url("./images/${game.tiles[a].texture}")`;
-         element.title = game.tiles[a].name;
+         element.style.backgroundImage = `url("./images/${this.gameFile.tiles[a].texture}")`;
+         element.title = this.gameFile.tiles[a].name;
          document.querySelector(".world-element-tiles").insertBefore(element, document.querySelector(".world-element-tiles").childNodes[0]);
          element.addEventListener("click", () => {
             this.editView.selectedElement = a;
             for (let a = 0; a < document.querySelectorAll(".world-element-tile").length; a++) {
-               document.querySelectorAll(".world-element-tile")[a].style.border = "";
+               document.querySelectorAll(".world-element-tile")[a].classList.remove("selected-world-tile");
             }
-            element.style.border = "2px solid #006b8c";
+            element.classList.add("selected-world-tile");
          });
       }
    }
@@ -163,7 +162,7 @@ export class Editor {
          this.compile();
       });
       document.querySelector(".compile-world").addEventListener("click", () => {
-         this.compileWorld();
+         this.compileWorld({showOwnPopup: true});
       });
       document.querySelector(".save-editor").addEventListener("click", async () => {
          let res = await this.saveToLoadedSavefile();
@@ -192,9 +191,8 @@ export class Editor {
    }
 
    compile() {
-      console.log("Beginning game compile");
       this.compileWorld();
-      console.log("Game compile complete");
+      this.Actions.actionPopup("COMPILE COMPLETE", "primary", `World: ${this.logs.worldCompile.before} objects compiled to ${this.logs.worldCompile.after} (${this.logs.worldCompile.ratio}%)`, [{text: "OK", style: "primary", action: () => {this.Actions.destroyPopup()}}]);
    }
 
    //? ======================================================================================================
@@ -227,16 +225,13 @@ export class Editor {
    //? Compilation
    //? ======================================================================================================
 
-   compileWorld() {
+   compileWorld(options) {
       let tiles = {};
       let boxes = [];
       Object.assign(tiles, this.gameFile.level);
       let startObjs = Object.keys(tiles).length;
 
-      console.log("Beginning world compile");
-      console.log(`Starting with ${startObjs} world objects`);
-
-      while (Object.keys(tiles).length > 0) { // Iterate through groups
+      while (Object.keys(tiles).length > 0) { // iterate through groups
          let startAt = this.Actions.findTopLeftKey(tiles, true);
          let origin = startAt[0] + "-" + startAt[1];
          let x = Number.MAX_VALUE;
@@ -245,19 +240,19 @@ export class Editor {
          let texture = tiles[origin];
          while (tiles[startAt[0] + "-" + (startAt[1] + y)] == tiles[origin]) { // while each tile below matches
             line = 0;
-            while (tiles[(startAt[0] + line) + "-" + (startAt[1] + y)] == tiles[origin]) { // while each tile to the right matches
+            while (tiles[(startAt[0] + line) + "-" + (startAt[1] + y)] == tiles[origin]) { // while each tile to the right matches, increase x distance
                line++;
                if (line >= x) { // ensure that narrower areas don't cause the rectangle to cover mismatching squares
                   break;
                }
             }
             x = line;
-            // console.log(`X is ${x}`);
             y++;
          }
-         if (x == Number.MAX_VALUE) {
+         if (x == Number.MAX_VALUE) { // if the box is only 1 wide
             x = 1;
          }
+         // cleanup tiles in box
          delete tiles[origin];
          for (let a = 0; a < x; a++) {
             for (let b = 0; b < y; b++) {
@@ -269,39 +264,27 @@ export class Editor {
          boxes.push(newBox);
       }
 
+      // log compile improvements
       let endObjs = Object.keys(boxes).length;
-      console.log(`Result: ${endObjs} world objects (${((endObjs / startObjs) * 100).toFixed(1)}%)`);
+      this.logs.worldCompile = {before: startObjs, after: endObjs, ratio: ((endObjs/startObjs)*100).toFixed(1)}
       
       this.game.boxes = boxes;
 
-      // let numTiles = document.querySelectorAll(".world-tile").length;
-      // for (let a = 0; a < numTiles; a++) {
-      //    let toRemove = document.querySelectorAll(".world-tile")[0];
-      //    toRemove.parentElement.removeChild(toRemove);
-      // }
+      // options - show popup, delete objects after compile
+      if (options && options.showOwnPopup) {
+         this.Actions.actionPopup("WORLD COMPILE COMPLETE", "primary", `${this.logs.worldCompile.before} objects compiled to ${this.logs.worldCompile.after} (${this.logs.worldCompile.ratio}%)`, [{text: "OK", style: "primary", action: () => {this.Actions.destroyPopup()}}]);
+      }
 
-      console.log("World compile complete");
+      if (options && options.deleteGameObjects) {
+         let numTiles = document.querySelectorAll(".world-tile").length;
+         for (let a = 0; a < numTiles; a++) {
+            let toRemove = document.querySelectorAll(".world-tile")[0];
+            toRemove.parentElement.removeChild(toRemove);
+         }
+      }
 
+      // show compiled tiles
       this.publishToGameView();
-
-      /*
-      start at top-leftmost gameobjects key
-      loop:
-      look for match to right until mismatch, record d1 (horizontal)
-      move 1 line down, repeat
-         - record shortest line
-      on mismatch below origin, end and record d2 (vertical)
-      from shortest line, draw box from origin to d1 to d2
-         
-      remove all included IDs from level and start over
-
-      done on empty tiles object
-
-      - should account for holes in terrain
-      - should give good results on stairsteps
-      - should reduce leftover single tiles
-      - test performance by drawing object, and attempt to beat compiler with different grouping methods
-      */
    }
 
    publishToGameView() {
