@@ -1,7 +1,6 @@
 import { level } from "./_level.js";
 export const game = {
    compiled: false,
-   imprtedFromSaveFile: false,
    title: "My First Game",
    tiles: [
       {
@@ -22,9 +21,17 @@ export const game = {
       {
          name: "Water Full",
          texture: "water-full.png",
-         hitbox: true,
+         hitbox: false,
       },
    ],
    level: {},
+   hitboxes: {},
    scripts: {},
 }
+
+/**
+ * Level values: 
+ * o: origin
+ * d: dimensions
+ * t: texture
+ */

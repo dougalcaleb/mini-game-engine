@@ -9,17 +9,17 @@
   background: #191919;
   border: 2px solid #282828;
 }
-.editor .elements .world .world-element-tiles, .editor .elements .scripts .world-element-tiles {
+.editor .elements > div .tiles {
   display: flex;
   justify-content: center;
   width: 90%;
   flex-wrap: wrap;
   margin: auto;
 }
-.editor .elements .world .world-element-tiles div, .editor .elements .scripts .world-element-tiles div {
+.editor .elements > div .tiles div {
   height: 50px;
   width: 50px;
-  background-color: #111;
+  background-color: #070707;
   margin: 10px;
   position: relative;
   cursor: pointer;
@@ -28,15 +28,20 @@
   image-rendering: pixelated;
   box-sizing: border-box;
 }
-.editor .elements .world .world-element-tiles .add-block svg, .editor .elements .scripts .world-element-tiles .add-block svg {
-  color: white;
+.editor .elements > div .tiles .add-tile {
+  border-radius: 5px;
+  background: transparent;
+  border: 3px solid #006b8c;
+}
+.editor .elements > div .tiles .add-tile svg {
+  color: #e8e8e8;
   position: absolute;
   left: 0;
   right: 0;
   top: 0;
   bottom: 0;
-  height: 35px;
-  width: 35px;
+  height: 30px;
+  width: 30px;
   margin: auto;
 }
 .editor .views {
@@ -69,6 +74,7 @@
   position: relative;
   background: #282828;
   margin: 5px;
+  transition: 0.2s;
 }
 .expandable .buttons {
   display: flex;

@@ -121,7 +121,7 @@ class GameEngine {
             suggestedName: `${game.title}.${config.fileExtension}`,
             types: [{accept: {"text/plain": [`.${config.fileExtension}`]}, description: "Game Engine Savefile"}]
          });
-         const file = await this.gameFileRef.getFile();
+         // const file = await this.gameFileRef.getFile();
          await this.saveToLoadedSavefile(this.gameFileRef, game);
       } catch (e) {
          console.warn(e);
