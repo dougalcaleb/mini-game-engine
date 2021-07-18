@@ -161,7 +161,7 @@ export class Editor {
 			document.querySelector(".physics-objs .tiles").insertBefore(element, document.querySelector(".physics-objs .tiles").childNodes[0]);
 			element.addEventListener("click", () => {
 				this.editView.selectedElement = "physObjs|"+a;
-				for (let a = 0; a < document.querySelectorAll(".world-element-tile").length; a++) {
+				for (let a = 0; a < document.querySelectorAll(".physics-obj-tile").length; a++) {
 					document.querySelectorAll(".physics-obj-tile")[a].classList.remove("selected-world-tile");
 				}
 				element.classList.add("selected-world-tile");
@@ -348,7 +348,8 @@ export class Editor {
 		let hitboxes = {};
 		Object.assign(hitboxes, this.gameFile.level);
       Object.keys(hitboxes).forEach((v) => {
-         if (this.gameFile.tiles[hitboxes[v]].hitbox) {
+         let tileData = hitboxes[v].split("|");
+         if (this.gameFile.tiles[tileData[1]].hitbox) {
             hitboxes[v] = 1;
          }
       });
@@ -438,7 +439,7 @@ export class Editor {
 	}
 
    // Render the compiled world boxes
-	publishToGameView() {
+   publishToGameView() {
 		document.querySelector(".game-view").style.backgroundColor = this.game.background;
 		if (this.game.world) {
 			this.game.world.parentElement.removeChild(this.game.world);
@@ -460,8 +461,9 @@ export class Editor {
 			newElement.style.transform = `translate(${origin[0] * 16}px, ${origin[1] * 16}px)`;
 			if (config.debug) {
 				newElement.style.backgroundColor = this.Actions.getRandomColor();
-			} else {
-				newElement.style.backgroundImage = `url("./images/${game.tiles[this.game.boxes[a].t].texture}")`;
+         } else {
+            let tileData = this.game.boxes[a].t.split("|");
+				newElement.style.backgroundImage = `url("./images/${this.gameFile[tileData[0]][tileData[1]].texture}")`;
 			}
 			this.game.world.appendChild(newElement);
 		}
