@@ -24,6 +24,27 @@ export const game = {
          hitbox: false,
       },
    ],
+   physObjs: [
+      {
+         name: "Block",
+         texture: "phys-block.png",
+         interactible: false,
+      },
+   ],
+   dynamObjs: [
+      {
+         name: "Visible Trigger",
+         texture: "visible-trigger.png",
+         type: "trigger",
+         enabled: true,
+      },
+   ],
+   
+      /**
+       * Track Object
+       * Invisible Trigger
+       * Button
+       */
    level: {},
    hitboxes: {},
    scripts: {},

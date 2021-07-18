@@ -34,18 +34,48 @@ class GameEngine {
             gameFile = {};
             Object.assign(gameFile, game);
          }
+         this.Splash.add("Verifying savefile...");
+         if (!this.verifySavefile(gameFile)) return;
+		   this.Splash.add("Savefile verified");
          document.title = `${gameFile.title} | MGE`;
          if (gameFile.compiled) {
-            this.createPhysicsEngine();
+            this.createPhysicsEngine(gameFile);
             this.loadGame();
          } else {
-            this.createPhysicsEngine();
+            this.createPhysicsEngine(gameFile);
             this.loadEditor(gameFile);
          }
          
          this.complete();
       }
    }
+
+   verifySavefile(file) {
+      // Ensure that all necessary data exists in the savefile
+		if (
+			typeof file.compiled == "boolean" &&
+			typeof file.title == "string" &&
+			typeof file.tiles == "object" &&
+			typeof file.level == "object" &&
+			typeof file.hitboxes == "object" &&
+         typeof file.scripts == "object" &&
+         typeof file.physObjs == "object" &&
+         typeof file.dynamObjs == "object"
+		) {
+         return true;
+		} else {
+			this.Actions.actionPopup("SAVEFILE ERROR", "critical", `The savefile is outdated, corrupt, or an incorrect filetype.`, [
+				{
+					text: "OK",
+					style: "primary",
+					action: () => {
+						this.Actions.destroyPopup();
+					},
+				},
+         ]);
+         return false;
+		}
+	}
 
    async savefile() {
       return new Promise((resolve, reject) => {
@@ -84,9 +114,9 @@ class GameEngine {
 		this.editor.init();
    }
    
-   createPhysicsEngine() {
+   createPhysicsEngine(gameFile) {
       this.Splash.add("Preparing Physics...");
-      this.Physics = new Physics(this.Splash);
+      this.Physics = new Physics(this.Splash, gameFile);
       this.Physics.init();
    }
 

@@ -44,8 +44,6 @@ export class Editor {
 
 	async init() {
 		this.Splash.add("Initializing Editor...");
-      if (!this.verifySavefile()) return;
-		this.Splash.add("Savefile verified");
 		this.createDropdowns();
 		this.Splash.add("Editor component 1 complete");
 		this.setupWorld();
@@ -79,34 +77,10 @@ export class Editor {
 			let pos = el.toString().split("-");
 			let newTile = document.createElement("DIV");
 			newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
-			newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
-			newTile.style.backgroundImage = `url("./images/${game.tiles[this.gameFile.level[el]].texture}")`;
+         newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+         let tileData = this.gameFile.level[el].split("|");
+			newTile.style.backgroundImage = `url("./images/${this.gameFile[tileData[0]][tileData[1]].texture}")`;
 			this.editView.world.appendChild(newTile);
-		}
-	}
-
-   verifySavefile() {
-      // Ensure that all necessary data exists in the savefile
-		if (
-			typeof this.gameFile.compiled == "boolean" &&
-			typeof this.gameFile.title == "string" &&
-			typeof this.gameFile.tiles == "object" &&
-			typeof this.gameFile.level == "object" &&
-			typeof this.gameFile.hitboxes == "object" &&
-			typeof this.gameFile.scripts == "object"
-		) {
-         return true;
-		} else {
-			this.Actions.actionPopup("SAVEFILE ERROR", "critical", `The savefile is outdated, corrupt, or an incorrect filetype.`, [
-				{
-					text: "OK",
-					style: "primary",
-					action: () => {
-						this.Actions.destroyPopup();
-					},
-				},
-         ]);
-         return false;
 		}
 	}
 
@@ -171,9 +145,24 @@ export class Editor {
 			element.title = this.gameFile.tiles[a].name;
 			document.querySelector(".world-tiles .tiles").insertBefore(element, document.querySelector(".world-tiles .tiles").childNodes[0]);
 			element.addEventListener("click", () => {
-				this.editView.selectedElement = a;
+				this.editView.selectedElement = "tiles|"+a;
 				for (let a = 0; a < document.querySelectorAll(".world-element-tile").length; a++) {
 					document.querySelectorAll(".world-element-tile")[a].classList.remove("selected-world-tile");
+				}
+				element.classList.add("selected-world-tile");
+			});
+      }
+      
+      for (let a = 0; a < this.gameFile.physObjs.length; a++) {
+			let element = document.createElement("DIV");
+			element.classList.add("physics-obj-tile");
+			element.style.backgroundImage = `url("./images/${this.gameFile.physObjs[a].texture}")`;
+			element.title = this.gameFile.physObjs[a].name;
+			document.querySelector(".physics-objs .tiles").insertBefore(element, document.querySelector(".physics-objs .tiles").childNodes[0]);
+			element.addEventListener("click", () => {
+				this.editView.selectedElement = "physObjs|"+a;
+				for (let a = 0; a < document.querySelectorAll(".world-element-tile").length; a++) {
+					document.querySelectorAll(".physics-obj-tile")[a].classList.remove("selected-world-tile");
 				}
 				element.classList.add("selected-world-tile");
 			});
@@ -544,8 +533,9 @@ export class Editor {
 				if (this.gameFile.level[`${pos[0]}-${pos[1]}`] == undefined) {
 					let newTile = document.createElement("DIV");
 					newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
-					newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
-					newTile.style.backgroundImage = `url("./images/${game.tiles[this.editView.selectedElement].texture}")`;
+               newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+               let seData = this.editView.selectedElement.split("|");
+					newTile.style.backgroundImage = `url("./images/${this.gameFile[seData[0]][seData[1]].texture}")`;
 					this.editView.world.appendChild(newTile);
 					this.gameFile.level[`${pos[0]}-${pos[1]}`] = this.editView.selectedElement;
 				}
@@ -565,7 +555,8 @@ export class Editor {
 					let newTile = document.createElement("DIV");
 					newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
 					newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
-					newTile.style.backgroundImage = `url("./images/${game.tiles[this.editView.selectedElement].texture}")`;
+					let seData = this.editView.selectedElement.split("|");
+					newTile.style.backgroundImage = `url("./images/${this.gameFile[seData[0]][seData[1]].texture}")`;
 					this.editView.world.appendChild(newTile);
 					this.gameFile.level[`${pos[0]}-${pos[1]}`] = this.editView.selectedElement;
 				}
