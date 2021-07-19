@@ -1,4 +1,14 @@
-import { level } from "./_level.js";
+/**
+ * @typedef {Object} game
+ * @property {boolean} compiled - Indicates whether the savefile is a compiled game
+ * @property {string} title - The title of the game
+ * @property {Array<Object>} tiles - Objects defining basic world tiles including 'name', 'texture', and 'hitbox' fields
+ * @property {Array<Object>} physObjs - Objects defining physics-enabled world objects including 'name', 'texture', and 'interactible' fields
+ * @property {Array<Object>} dynamObjs - Objects defining dynamic world objects including 'name', 'texture', 'type', and 'enabled' fields
+ * @property {Object} level - Represents the world objects by coordinate-pair keys and numerical values that indicate the position of the tile in the respective object type array
+ * @property {Object} hitboxes - Represents the world's hitboxes by coordinate-pair keys. Only existing hitboxes appear in this datastructure
+ * @property {Object} scripts - Contains scripts
+ */
 export const game = {
    compiled: false,
    title: "My First Game",
@@ -39,16 +49,20 @@ export const game = {
          enabled: true,
       },
    ],
-   
-      /**
-       * Track Object
-       * Invisible Trigger
-       * Button
-       */
-   level: {},
+   level: {
+      tiles: {},
+      physObjs: {},
+      dynamObjs: {}
+   },
    hitboxes: {},
    scripts: {},
 }
+
+/**
+ * Track Object
+ * Invisible Trigger
+ * Button
+ */
 
 /**
  * Level values: 

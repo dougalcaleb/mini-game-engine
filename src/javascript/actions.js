@@ -93,10 +93,10 @@ export class Actions {
    
    /**
     * 
-    * @param {*} title The title to display on the error popup
-    * @param {*} style The style of the popup (primary, warn, critical)
-    * @param {*} message Explanation text on the body of the message
-    * @param {*} buttons Array of objects defining buttons containing fields "text" [str], "style" [str], and "action" [func]
+    * @param {String} title The title to display on the error popup
+    * @param {String} style The style of the popup (primary, warn, critical)
+    * @param {String} message Explanation text on the body of the message
+    * @param {Array} buttons Objects defining buttons containing fields "text" [str], "style" [str], and "action" [func]
     */
    async actionPopup(title = "ERROR", style = "primary", message = "Unspecified", buttons = [{ text: "Cancel", style: "primary", action: () => { } }]) {
       return new Promise((resolve, reject) => {
