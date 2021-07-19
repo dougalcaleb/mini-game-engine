@@ -1,9 +1,10 @@
-import {game} from "../../game/game.js";
+import { game } from "../../game/game.js";
 import { Editor } from "./editor.js";
 import { Splash } from "./splash.js";
 import { Physics } from "./physics.js";
 import { Actions } from "./actions.js";
 import { config } from "./_config.js";
+import { Runtime } from "./runtime.js";
 
 class GameEngine {
 	constructor() {
@@ -40,9 +41,11 @@ class GameEngine {
          document.title = `${gameFile.title} | MGE`;
          if (gameFile.compiled) {
             this.createPhysicsEngine(gameFile);
+            this.createRuntime();
             this.loadGame();
          } else {
             this.createPhysicsEngine(gameFile);
+            this.createRuntime();
             this.loadEditor(gameFile);
          }
          
@@ -110,7 +113,7 @@ class GameEngine {
 	/** Loads the game and editor */
    loadEditor(gameFile) {
       this.Splash.add("Preparing Editor...");
-		this.editor = new Editor(this.Splash, this.Physics, {gameFileRef: this.gameFileRef, gameFile: gameFile});
+		this.editor = new Editor(this.Splash, this.Physics, this.Runtime, {gameFileRef: this.gameFileRef, gameFile: gameFile});
 		this.editor.init();
    }
    
@@ -118,6 +121,12 @@ class GameEngine {
       this.Splash.add("Preparing Physics...");
       this.Physics = new Physics(this.Splash, gameFile);
       this.Physics.init();
+   }
+
+   createRuntime() {
+      this.Splash.add("Preparing Physics...");
+      this.Runtime = new Runtime(this.Physics, this.Splash);
+      this.Runtime.init();
    }
 
 	/** Loads a compiled game */

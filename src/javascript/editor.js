@@ -1,9 +1,8 @@
-import { game } from "../../game/game.js";
 import { config } from "./_config.js";
 import { Actions } from "./actions.js";
 
 export class Editor {
-	constructor(splash, physics, givenGame) {
+	constructor(splash, physics, runtime, givenGame) {
 		this.elements = {};
 		this.gameView = {};
 		this.editView = {
@@ -18,13 +17,16 @@ export class Editor {
 			hitboxes: {},
 			world: null,
 			background: "#09c4e8",
-			tileSize: config.tileSize,
+         tileSize: config.tileSize,
+         compiledGameExists: false,
 		};
 
 		this.logs = {};
 
 		this.gameFile = givenGame.gameFile;
-		(this.gameFileRef = givenGame.gameFileRef), (this.Physics = physics);
+      this.gameFileRef = givenGame.gameFileRef;
+      this.Physics = physics;
+      this.Runtime = runtime;
 		this.Splash = splash;
 
 		this.Splash.add("Initializing Actions Module...");
@@ -77,7 +79,8 @@ export class Editor {
 			let pos = el.toString().split("-");
 			let newTile = document.createElement("DIV");
 			newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
-         newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+         // newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+         this.Actions.tilePosition(newTile, pos);
 			newTile.style.backgroundImage = `url("./images/${this.gameFile.tiles[this.gameFile.level.tiles[el]].texture}")`;
 			this.editView.world.appendChild(newTile);
       }
@@ -87,7 +90,8 @@ export class Editor {
 			let pos = el.toString().split("-");
 			let newTile = document.createElement("DIV");
 			newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
-         newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+         // newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+         this.Actions.tilePosition(newTile, pos);
 			newTile.style.backgroundImage = `url("./images/${this.gameFile.physObjs[this.gameFile.level.physObjs[el]].texture}")`;
 			this.editView.world.appendChild(newTile);
       }
@@ -97,7 +101,8 @@ export class Editor {
 			let pos = el.toString().split("-");
 			let newTile = document.createElement("DIV");
 			newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
-         newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+         // newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+         this.Actions.tilePosition(newTile, pos);
 			newTile.style.backgroundImage = `url("./images/${this.gameFile.dynamObjs[this.gameFile.level.dynamObjs[el]].texture}")`;
 			this.editView.world.appendChild(newTile);
 		}
@@ -142,8 +147,8 @@ export class Editor {
    setupWorld() {
 		this.editView.world = document.querySelector(".world-edit");
 
-		let worldHeight = this.game.tileSize * 100;
-		let worldWidth = this.game.tileSize * 200;
+		let worldHeight = this.game.tileSize * config.worldHeight;
+		let worldWidth = this.game.tileSize * config.worldWidth;
 
 		this.editView.world.style.height = worldHeight + "px";
 		this.editView.world.style.width = worldWidth + "px";
@@ -231,6 +236,38 @@ export class Editor {
 					]
 				);
 			}
+      });
+      document.querySelector(".game-play").addEventListener("click", () => {
+         if (this.game.compiledGameExists) {
+            this.Runtime.Run(this.gameFile);
+            document.querySelector(".game-play").classList.add("hidden");
+            document.querySelector(".game-pause").classList.remove("hidden");
+            document.querySelector(".game-stop").classList.remove("disabled");
+         } else {
+            this.Actions.actionPopup("NO GAME TO RUN", "warn", "There is no compiled game to run.", [
+               {
+                  text: "OK",
+                  style: "primary",
+                  action: () => {
+                     this.Actions.destroyPopup();
+                  },
+               }]
+            );
+         }
+      });
+      
+      document.querySelector(".game-stop").addEventListener("click", () => {
+         this.Runtime.Stop();
+         document.querySelector(".game-play").classList.remove("hidden");
+         document.querySelector(".game-pause").classList.add("hidden");
+         document.querySelector(".game-stop").classList.add("disabled");
+      });
+      
+      document.querySelector(".game-pause").addEventListener("click", () => {
+         this.Runtime.Pause();
+         document.querySelector(".game-play").classList.remove("hidden");
+         document.querySelector(".game-pause").classList.add("hidden");
+         document.querySelector(".game-stop").classList.remove("disabled");
 		});
 	}
 
@@ -345,6 +382,7 @@ export class Editor {
             ]
          );
       } else {
+         this.game.compiledGameExists = true;
          this.Actions.actionPopup(
             "COMPILE COMPLETE",
             "primary",
@@ -365,10 +403,12 @@ export class Editor {
    // Copy the game objects as basic data to be read as a hitbox
 	compileHitboxes() {
 		let hitboxes = {};
-		Object.assign(hitboxes, this.gameFile.level);
+		Object.assign(hitboxes, this.gameFile.level.tiles);
       Object.keys(hitboxes).forEach((v) => {
          if (this.gameFile.tiles[hitboxes[v]].hitbox) {
             hitboxes[v] = 1;
+         } else {
+            delete hitboxes[v];
          }
       });
 		this.gameFile.hitboxes = hitboxes;
@@ -379,7 +419,7 @@ export class Editor {
 	compileWorld(options) {
 		let tiles = {};
 		let boxes = [];
-		Object.assign(tiles, this.gameFile.level);
+		Object.assign(tiles, this.gameFile.level.tiles);
 		let startObjs = Object.keys(tiles).length;
 
 		while (Object.keys(tiles).length > 0) {
@@ -415,10 +455,13 @@ export class Editor {
 					let toDelete = startAt[0] + a + "-" + (startAt[1] + b);
 					delete tiles[toDelete];
 				}
-			}
-			let newBox = {o: origin, d: x + "|" + y, t: texture};
+         }
+         let splOrigin = origin.split("-");
+         let adjOrigin = [parseInt(splOrigin[0]), parseInt(splOrigin[1])];
+         adjOrigin[1] += y - 1;
+			let newBox = {o: adjOrigin.join("-"), d: x + "|" + y, t: texture};
 			boxes.push(newBox);
-		}
+      }
 
 		// log compile improvements
 		let endObjs = Object.keys(boxes).length;
@@ -464,26 +507,45 @@ export class Editor {
 		}
 		let world = document.createElement("DIV");
 		world.classList.add("game-world");
-		world.style.height = this.game.tileSize * 100 + "px";
-		world.style.width = this.game.tileSize * 200 + "px";
+		world.style.height = this.game.tileSize * config.worldHeight + "px";
+		world.style.width = this.game.tileSize * config.worldWidth + "px";
 		document.querySelector(".game-view").appendChild(world);
 		this.game.world = world;
-		this.game.world.style.transform = `translate(20px, ${-(this.game.tileSize * 100) + document.querySelector(".game-view").offsetHeight - 20}px)`;
+      this.game.world.style.transform = `translate(20px, ${-(this.game.tileSize * 100) + document.querySelector(".game-view").offsetHeight - 20}px)`;
+      // World elements
 		for (let a = 0; a < this.game.boxes.length; a++) {
 			let newElement = document.createElement("DIV");
 			newElement.classList.add(`world-box-${this.game.boxes[a].o}`, "world-box");
 			let origin = this.game.boxes[a].o.split("-");
 			let dimensions = this.game.boxes[a].d.split("|");
-			newElement.style.width = dimensions[0] * 16 + "px";
-			newElement.style.height = dimensions[1] * 16 + "px";
-			newElement.style.transform = `translate(${origin[0] * 16}px, ${origin[1] * 16}px)`;
+			newElement.style.width = dimensions[0] * this.game.tileSize + "px";
+         newElement.style.height = dimensions[1] * this.game.tileSize + "px";
+         this.Actions.tilePosition(newElement, origin);
+         console.log(`Placing object at position ${origin[0]}, ${origin[1]}`);
+			// newElement.style.transform = `translate(${origin[0] * this.game.tileSize}px, ${origin[1] * this.game.tileSize}px)`;
 			if (config.debug) {
 				newElement.style.backgroundColor = this.Actions.getRandomColor();
          } else {
 				newElement.style.backgroundImage = `url("./images/${this.gameFile.tiles[this.game.boxes[a].t].texture}")`;
 			}
 			this.game.world.appendChild(newElement);
-		}
+      }
+      // Physics objects
+      // for (const el in this.gameFile.level.physObjs) {
+		// 	let newElement = document.createElement("DIV");
+		// 	newElement.classList.add(`world-box-${el.toString()}`, "world-box");
+		// 	let origin = el.toString().split("-");
+		// 	newElement.style.width = this.game.tileSize + "px";
+		// 	newElement.style.height = this.game.tileSize + "px";
+		// 	newElement.style.transform = `translate(${origin[0] * this.game.tileSize}px, ${origin[1] * this.game.tileSize}px)`;
+		// 	if (config.debug) {
+		// 		newElement.style.backgroundColor = this.Actions.getRandomColor();
+      //    } else {
+		// 		newElement.style.backgroundImage = `url("./images/${this.gameFile.physObjs[this.gameFile.level.physObjs[el]].texture}")`;
+		// 	}
+		// 	this.game.world.appendChild(newElement);
+      // }
+      
 		if (document.querySelector(".world-errors").children.length == 2) {
 			document.querySelector(".world-errors").children[1].style.display = "none";
 		}
@@ -547,7 +609,9 @@ export class Editor {
 				pos = [
 					Math.round((event.clientX - bcr.left - this.game.tileSize / 2) / this.game.tileSize),
 					Math.round((event.clientY - bcr.top - this.game.tileSize / 2) / this.game.tileSize),
-				];
+            ];
+            
+            pos[1] = (config.worldHeight - pos[1]);
 
             if (
                this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`] == undefined &&
@@ -555,8 +619,9 @@ export class Editor {
                this.gameFile.level.dynamObjs[`${pos[0]}-${pos[1]}`] == undefined
             ) {
 					let newTile = document.createElement("DIV");
-					newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
-               newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+               newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
+               this.Actions.tilePosition(newTile, pos);
+               // newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
                let seData = this.editView.selectedElement.split("|");
 					newTile.style.backgroundImage = `url("./images/${this.gameFile[seData[0]][parseInt(seData[1])].texture}")`;
 					this.editView.world.appendChild(newTile);
@@ -572,7 +637,9 @@ export class Editor {
 				pos = [
 					Math.round((event.clientX - bcr.left - this.game.tileSize / 2) / this.game.tileSize),
 					Math.round((event.clientY - bcr.top - this.game.tileSize / 2) / this.game.tileSize),
-				];
+            ];
+            
+            pos[1] = (config.worldHeight - pos[1]);
 
             if ((pos[0] != prevPos[0] || pos[1] != prevPos[1]) &&
                this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`] == undefined &&
@@ -580,8 +647,9 @@ export class Editor {
                this.gameFile.level.dynamObjs[`${pos[0]}-${pos[1]}`] == undefined
             ) {
 					let newTile = document.createElement("DIV");
-					newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
-					newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
+               newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
+               this.Actions.tilePosition(newTile, pos);
+					// newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
 					let seData = this.editView.selectedElement.split("|");
 					newTile.style.backgroundImage = `url("./images/${this.gameFile[seData[0]][parseInt(seData[1])].texture}")`;
 					this.editView.world.appendChild(newTile);
@@ -621,12 +689,20 @@ export class Editor {
 				pos = [
 					Math.round((event.clientX - bcr.left - this.game.tileSize / 2) / this.game.tileSize),
 					Math.round((event.clientY - bcr.top - this.game.tileSize / 2) / this.game.tileSize),
-				];
+            ];
+            
+            pos[1] = (config.worldHeight - pos[1]);
 
-				if (this.gameFile.level[`${pos[0]}-${pos[1]}`] != undefined) {
+            if (
+               this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`] != undefined ||
+               this.gameFile.level.physObjs[`${pos[0]}-${pos[1]}`] != undefined ||
+               this.gameFile.level.dynamObjs[`${pos[0]}-${pos[1]}`] != undefined
+            ) {
 					let toRemove = document.querySelector(`.world-tile-id-${pos[0]}-${pos[1]}`);
 					toRemove.parentElement.removeChild(toRemove);
-					delete this.gameFile.level[`${pos[0]}-${pos[1]}`];
+					delete this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`];
+					delete this.gameFile.level.physObjs[`${pos[0]}-${pos[1]}`];
+					delete this.gameFile.level.dynamObjs[`${pos[0]}-${pos[1]}`];
 				}
 			}
 		});
@@ -638,12 +714,20 @@ export class Editor {
 				pos = [
 					Math.round((event.clientX - bcr.left - this.game.tileSize / 2) / this.game.tileSize),
 					Math.round((event.clientY - bcr.top - this.game.tileSize / 2) / this.game.tileSize),
-				];
+            ];
+            
+            pos[1] = (config.worldHeight - pos[1]);
 
-				if ((pos[0] != prevPos[0] || pos[1] != prevPos[1]) && this.gameFile.level[`${pos[0]}-${pos[1]}`] != undefined) {
+            if ((pos[0] != prevPos[0] || pos[1] != prevPos[1]) && (
+               this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`] != undefined ||
+               this.gameFile.level.physObjs[`${pos[0]}-${pos[1]}`] != undefined ||
+               this.gameFile.level.dynamObjs[`${pos[0]}-${pos[1]}`] != undefined)
+            ) {
 					let toRemove = document.querySelector(`.world-tile-id-${pos[0]}-${pos[1]}`);
 					toRemove.parentElement.removeChild(toRemove);
-					delete this.gameFile.level[`${pos[0]}-${pos[1]}`];
+					delete this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`];
+					delete this.gameFile.level.physObjs[`${pos[0]}-${pos[1]}`];
+					delete this.gameFile.level.dynamObjs[`${pos[0]}-${pos[1]}`];
 				}
 
 				prevPos = [pos[0], pos[1]];

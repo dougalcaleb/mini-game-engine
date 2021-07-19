@@ -1,10 +1,10 @@
 export class Splash {
    constructor() {
-      this.speed = 50;
+      this.speed = 20;
       this.waitAfter = 100;
       this.waitBefore = 500;
       this.queue = [];
-      this.readies = ["Editor", "GameEngine", "Physics", "Ready"]
+      this.readies = ["Editor", "GameEngine", "Physics", "Runtime", "Ready"]
       this.int = null;
       this.pageIsLoaded = false;
 

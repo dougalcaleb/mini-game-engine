@@ -69,6 +69,46 @@
   position: relative;
 }
 
+.play-menu {
+  position: relative;
+  background: #282828;
+  margin: 5px;
+  transition: 0.2s;
+  padding: 5px;
+  display: flex;
+  justify-content: space-evenly;
+}
+.play-menu button {
+  background: #006b8c;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+  color: white;
+  position: relative;
+  border: none;
+  height: 40px;
+  width: 40px;
+}
+.play-menu button svg {
+  position: absolute;
+  height: 30px;
+  width: 30px;
+  margin: auto;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.play-menu button.hidden {
+  display: none;
+}
+
+.play-menu button.disabled {
+  filter: brightness(70%);
+  cursor: default;
+}
+
 .expandable {
   overflow: hidden;
   position: relative;

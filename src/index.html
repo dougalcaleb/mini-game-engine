@@ -40,7 +40,15 @@
                   </div>
 					</div>
 				</div>
-				<div class="scripts expandable start-expanded">
+            <div class="physics-objs expandable start-expanded">
+               <p class="title">Physics Objects</p>
+               <div class="tiles"></div>
+            </div>
+            <div class="dynamic-objs expandable">
+               <p class="title">Dynamic Objects</p>
+               <div class="tiles"></div>
+            </div>
+            <div class="scripts expandable">
                <p class="title">Scripts</p>
                <div class="tiles">
 						<div class="add-script add-tile" title="Create new object script">
@@ -49,14 +57,6 @@
                     </svg>
                   </div>
 					</div>
-            </div>
-            <div class="physics-objs expandable start-expanded">
-               <p class="title">Physics Objects</p>
-               <div class="tiles"></div>
-            </div>
-            <div class="dynamic-objs expandable">
-               <p class="title">Dynamic Objects</p>
-               <div class="tiles"></div>
             </div>
 			</div>
 			<div class="views">
@@ -94,6 +94,23 @@
             </div>
 			</div>
 			<div class="inspector">
+            <div class="play-menu">
+               <button class="game-play">
+                  <svg viewBox="0 0 24 24">
+                     <path fill="currentColor" d="M8,5.14V19.14L19,12.14L8,5.14Z" />
+                 </svg>
+               </button>
+               <button class="game-pause hidden">
+                  <svg viewBox="0 0 24 24">
+                     <path fill="currentColor" d="M14,19H18V5H14M6,19H10V5H6V19Z" />
+                 </svg>
+               </button>
+               <button class="game-stop disabled">
+                  <svg viewBox="0 0 24 24">
+                     <path fill="currentColor" d="M18,18H6V6H18V18Z" />
+                 </svg>
+               </button>
+            </div>
             <div class="global-options expandable start-expanded">
                <p class="title">Global</p>
                <div class="buttons">
@@ -101,6 +118,10 @@
                   <button class="compile-all">Compile Game</button>
                   <button class="compile-and-export">Compile and Export</button>
                   <button class="save-editor">Save</button>
+                  <!-- <div class="buttons-row">
+                     
+                  </div> -->
+                  <!-- <button class="run-game">Run</button> -->
                </div>
             </div>
          </div>

@@ -14,5 +14,7 @@ export const config = {
    editviewMoveStep: 25,
    fastMovementMultiplier: 3,
    tileSize: 16,
+   worldHeight: 100,
+   worldWidth: 200,
    fileExtension: "ges",
 }
