@@ -11,6 +11,8 @@ export class Runtime {
 
       this.step = null;
 
+      this.currentFrame = null;
+
       this.physObjs = {};
    }
 
@@ -33,7 +35,8 @@ export class Runtime {
       } else if (this.state == "stop") {
          this.game = game;
          this.state = "play";
-         this.physObjs = this.Physics.prepareObjects();
+         this.Physics.GameStart(game);
+         this.physObjs = this.Physics.PrepareObjects();
          this.step = this._step.bind(this);
          window.requestAnimationFrame(() => {
             this.step();
@@ -43,12 +46,10 @@ export class Runtime {
 
    Stop() {
       this.state = "stop";
-      this.game = null;
-      setTimeout(() => {
-         if (!this.cleanupComplete) {
-            this._cleanup();
-         }
-      }, 0);
+      this.game = {};
+      window.cancelAnimationFrame(this.currentFrame);
+      this.Physics.GameStop();
+      this._cleanup();
    }
 
    Pause() {
@@ -63,38 +64,39 @@ export class Runtime {
       this.cleanupComplete = true;
       for (const obj in this.physObjs) {
          this.physObjs[obj].worldElement.parentElement.removeChild(this.physObjs[obj].worldElement);
+         delete this.physObjs[obj];
       }
    }
    
    _step() {
-
-      this._physicsStep();
-
       if (this.state == "play") {
-         window.requestAnimationFrame(this.step);
+         this._physicsStep();
+         this.currentFrame = window.requestAnimationFrame(this.step);
       } else if (this.state == "stop") {
          this._cleanup();
       }
    }
+
+   // probably needs cleanup
 
    _physicsStep() {
       for (const obj in this.physObjs) {
          this.physObjs[obj].velocity.y += this.physObjs[obj].gravity;
 
          let collisions = this.Physics.CheckCollisions(this.physObjs[obj]);
-         // console.log(collisions);
 
-         if (Math.sign(collisions.y) == -1 && this.physObjs.velocity.y < 0 && collisions.y != null) {
-            this.physObjs[obj].position.y += collisions.y;
+         if (collisions && collisions.y != null) {
+            this.physObjs[obj].position.y -= collisions.y;
             this.physObjs[obj].velocity.y = 0;
+            let pos = this.physObjs[obj].position.x + "-" + this.physObjs[obj].position.y;
+            this.Physics.AddHitboxes([pos]);
          } else {
             this.physObjs[obj].position.x += this.physObjs[obj].velocity.x;
             this.physObjs[obj].position.y += this.physObjs[obj].velocity.y;
          }
 
-         console.log(this.physObjs[obj].velocity.y + " | "+this.physObjs[obj].position.y);
-
-         this.physObjs[obj].worldElement.style.transform = `translate(${this.physObjs[obj].position.x * config.tileSize}px, ${(config.worldHeight - this.physObjs[obj].position.y) * config.tileSize}px)`;
+         this.physObjs[obj].worldElement.style.transform =
+            `translate(${(this.physObjs[obj].position.x * config.tileSize)}px, ${((config.worldHeight - this.physObjs[obj].position.y - 1) * config.tileSize)}px)`;
       }
    }
 }

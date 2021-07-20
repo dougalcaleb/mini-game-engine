@@ -38,12 +38,6 @@ export class Editor {
 	//? GENERAL
 	//? ======================================================================================================
 
-	/**
-	 * TODO:
-    * Physics engine
-    * Game runtime
-	 */
-
 	async init() {
 		this.Splash.add("Initializing Editor...");
 		this.createDropdowns();
@@ -79,7 +73,6 @@ export class Editor {
 			let pos = el.toString().split("-");
 			let newTile = document.createElement("DIV");
 			newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
-         // newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
          this.Actions.tilePosition(newTile, pos);
 			newTile.style.backgroundImage = `url("./images/${this.gameFile.tiles[this.gameFile.level.tiles[el]].texture}")`;
 			this.editView.world.appendChild(newTile);
@@ -90,7 +83,6 @@ export class Editor {
 			let pos = el.toString().split("-");
 			let newTile = document.createElement("DIV");
 			newTile.classList.add(`world-tile-id-${el.toString()}`, `world-tile`);
-         // newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
          this.Actions.tilePosition(newTile, pos);
 			newTile.style.backgroundImage = `url("./images/${this.gameFile.physObjs[this.gameFile.level.physObjs[el]].texture}")`;
 			this.editView.world.appendChild(newTile);
@@ -202,9 +194,6 @@ export class Editor {
 		document.querySelector(".compile-all").addEventListener("click", () => {
 			this.compile();
 		});
-		// document.querySelector(".compile-world").addEventListener("click", () => {
-		// 	this.compileWorld({showOwnPopup: true});
-      // });
       document.querySelector(".compile-and-export").addEventListener("click", () => {
 			this.compile({export: true});
 		});
@@ -412,7 +401,7 @@ export class Editor {
          }
       });
 		this.gameFile.hitboxes = hitboxes;
-		this.logs.hitboxCompile = "SUCCESS";
+      this.logs.hitboxCompile = "SUCCESS";
 	}
 
    // Simplify the world tiles into larger boxes to improve performance
@@ -521,8 +510,6 @@ export class Editor {
 			newElement.style.width = dimensions[0] * this.game.tileSize + "px";
          newElement.style.height = dimensions[1] * this.game.tileSize + "px";
          this.Actions.tilePosition(newElement, origin);
-         console.log(`Placing object at position ${origin[0]}, ${origin[1]}`);
-			// newElement.style.transform = `translate(${origin[0] * this.game.tileSize}px, ${origin[1] * this.game.tileSize}px)`;
 			if (config.debug) {
 				newElement.style.backgroundColor = this.Actions.getRandomColor();
          } else {
@@ -530,21 +517,6 @@ export class Editor {
 			}
 			this.game.world.appendChild(newElement);
       }
-      // Physics objects
-      // for (const el in this.gameFile.level.physObjs) {
-		// 	let newElement = document.createElement("DIV");
-		// 	newElement.classList.add(`world-box-${el.toString()}`, "world-box");
-		// 	let origin = el.toString().split("-");
-		// 	newElement.style.width = this.game.tileSize + "px";
-		// 	newElement.style.height = this.game.tileSize + "px";
-		// 	newElement.style.transform = `translate(${origin[0] * this.game.tileSize}px, ${origin[1] * this.game.tileSize}px)`;
-		// 	if (config.debug) {
-		// 		newElement.style.backgroundColor = this.Actions.getRandomColor();
-      //    } else {
-		// 		newElement.style.backgroundImage = `url("./images/${this.gameFile.physObjs[this.gameFile.level.physObjs[el]].texture}")`;
-		// 	}
-		// 	this.game.world.appendChild(newElement);
-      // }
       
 		if (document.querySelector(".world-errors").children.length == 2) {
 			document.querySelector(".world-errors").children[1].style.display = "none";
@@ -611,7 +583,7 @@ export class Editor {
 					Math.round((event.clientY - bcr.top - this.game.tileSize / 2) / this.game.tileSize),
             ];
             
-            pos[1] = (config.worldHeight - pos[1]);
+            pos[1] = (config.worldHeight - pos[1] - 1);
 
             if (
                this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`] == undefined &&
@@ -621,7 +593,6 @@ export class Editor {
 					let newTile = document.createElement("DIV");
                newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
                this.Actions.tilePosition(newTile, pos);
-               // newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
                let seData = this.editView.selectedElement.split("|");
 					newTile.style.backgroundImage = `url("./images/${this.gameFile[seData[0]][parseInt(seData[1])].texture}")`;
 					this.editView.world.appendChild(newTile);
@@ -639,17 +610,16 @@ export class Editor {
 					Math.round((event.clientY - bcr.top - this.game.tileSize / 2) / this.game.tileSize),
             ];
             
-            pos[1] = (config.worldHeight - pos[1]);
+            pos[1] = (config.worldHeight - pos[1] - 1);
 
             if ((pos[0] != prevPos[0] || pos[1] != prevPos[1]) &&
                this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`] == undefined &&
                this.gameFile.level.physObjs[`${pos[0]}-${pos[1]}`] == undefined &&
-               this.gameFile.level.dynamObjs[`${pos[0]}-${pos[1]}`] == undefined
+               this.gameFile.level.dynamObjs[`${pos[0]}-${(pos[1] - 1)}`] == undefined
             ) {
 					let newTile = document.createElement("DIV");
                newTile.classList.add(`world-tile-id-${pos[0]}-${pos[1]}`, `world-tile`);
                this.Actions.tilePosition(newTile, pos);
-					// newTile.style.transform = `translate(${pos[0] * this.game.tileSize}px, ${pos[1] * this.game.tileSize}px)`;
 					let seData = this.editView.selectedElement.split("|");
 					newTile.style.backgroundImage = `url("./images/${this.gameFile[seData[0]][parseInt(seData[1])].texture}")`;
 					this.editView.world.appendChild(newTile);
@@ -691,7 +661,7 @@ export class Editor {
 					Math.round((event.clientY - bcr.top - this.game.tileSize / 2) / this.game.tileSize),
             ];
             
-            pos[1] = (config.worldHeight - pos[1]);
+            pos[1] = (config.worldHeight - pos[1] - 1);
 
             if (
                this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`] != undefined ||
@@ -716,7 +686,7 @@ export class Editor {
 					Math.round((event.clientY - bcr.top - this.game.tileSize / 2) / this.game.tileSize),
             ];
             
-            pos[1] = (config.worldHeight - pos[1]);
+            pos[1] = (config.worldHeight - pos[1] - 1);
 
             if ((pos[0] != prevPos[0] || pos[1] != prevPos[1]) && (
                this.gameFile.level.tiles[`${pos[0]}-${pos[1]}`] != undefined ||

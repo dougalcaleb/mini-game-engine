@@ -99,8 +99,7 @@ export class Actions {
    tilePosition(object, pos) {
       pos[0] = parseInt(pos[0]);
       pos[1] = parseInt(pos[1]);
-      // object.style.transform = `translate(${pos[0] * config.tileSize}px, ${pos[1] * config.tileSize}px)`;
-      object.style.transform = `translate(${pos[0] * config.tileSize}px, ${(config.worldHeight - pos[1]) * config.tileSize}px)`;
+      object.style.transform = `translate(${(pos[0] * config.tileSize)}px, ${((config.worldHeight - pos[1] - 1) * config.tileSize)}px)`;
    }
    
    /**
